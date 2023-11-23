@@ -1,4 +1,0 @@
-mongo_db_param:
-  URI = "Connect_URL"
-  DATABASE_NAME = "Database_Name"
-  COLLECTION_NAME = "Collection_Name"
