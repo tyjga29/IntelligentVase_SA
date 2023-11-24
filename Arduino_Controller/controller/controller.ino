@@ -30,6 +30,7 @@ const int MoistureAnalog_Input = MOISTURE_ANALOG_INPUT;
 const int waterpump_activation = WATERPUMP_ACTIVATION;
 const int waterpump_pause = WATERPUMP_PAUSE;
 const int waterpump_tries = WATERPUMP_TRIES;
+const int moisture_margin_of_error = MOISTURE_MARGIN;
 
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
@@ -152,12 +153,19 @@ void onMqttMessage(int messageSize) {
 void activate_pump_to_moisture_level(int value_to_reach) {
   bool level_reached = false;
   int error = 0;
+  int beginning_moisture_level = analogRead(MoistureAnalog_Input);
   while (!level_reached) {
     int moisture_value = analogRead(MoistureAnalog_Input);
     if (error >= waterpump_tries) {
-      Serial.println("Error. Waterpump not working.");
-      level_reached = true;
-      sendWaterpumpError();
+      if (moisture_value <= (beginning_moisture_level + moisture_margin_of_error)) {
+        Serial.println("Error. Waterpump not working.");
+        level_reached = true;
+        sendWaterpumpError();
+      }
+      else {
+        error = 0;
+        beginning_moisture_level = moisture_value;
+      }
     }
     else if (moisture_value < value_to_reach) {
       Serial.print("Waterpump pumping for ");

@@ -22,6 +22,7 @@
 #define WATERPUMP_ACTIVATION 5
 #define WATERPUMP_PAUSE 5
 #define WATERPUMP_TRIES 5
+#define MOISTURE_MARGIN 5
 
 
 #endif
