@@ -15,8 +15,8 @@ topics = [
     mqtt_resources["WATERPUMP_ERROR_TOPIC"]
 ]
 
-token = "nFmBs0HU3osG90Kt5q1qjRekrRasn3fheMpc7QaFQNF2ueIxPvGdusaf_xLfEPq-pmQuVnHLBtg6DL4V2lm3Uw=="
-org = "Tyjga Enterprsie"
+token = "secret-token"
+org = "my-init-org"
 url = "http://localhost:8086"
 
 write_client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
