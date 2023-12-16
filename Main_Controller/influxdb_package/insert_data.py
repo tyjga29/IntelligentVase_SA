@@ -15,13 +15,13 @@ topics = [
     mqtt_resources["WATERPUMP_ERROR_TOPIC"]
 ]
 
-token = "secret-token"
-org = "my-init-org"
-url = "http://localhost:8086"
+token = "secret_token"
+org = "my_org"
+url = "http://influxdb:8086"
 
-write_client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
+write_client = InfluxDBClient(url=url, token=token, org=org)
 
-bucket="Intelligent_Vase"
+bucket= "my_bucket"
 
 write_api = write_client.write_api(write_options=SYNCHRONOUS)
    
@@ -39,10 +39,11 @@ def write_data(topic, value):
         pass
 
     if measurement_name:
+        value = float(value)
         point = (
             Point(measurement_name)
             .tag("SensorId", "1")
             .field("Measurement", value)
         )
-        write_api.write(bucket=bucket, org="Tyjga Enterprsie", record=point)
+        write_api.write(bucket=bucket, org=org, record=point)
         print(f"Sent data to datapoint: {measurement_name}")
