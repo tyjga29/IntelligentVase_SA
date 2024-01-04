@@ -3,5 +3,7 @@ mqtt_resources:
   BROKER_PORT: 1883
   LIGHT_DATA_TOPIC: "light_ard"
   MOISTURE_DATA_TOPIC: "moisture_ard"
+  HUMIDITY_DATA_TOPIC: "humidity_ard"
+  TEMPERATURE_DATA_TOPIC: "temperature_ard"
   WATERPUMP_ACTIVATE_TOPIC: "waterpump_activate_ard"
   WATERPUMP_ERROR_TOPIC: "waterpump_error_ard"

@@ -11,7 +11,7 @@ with open(yaml_path, 'r') as f:
     mqtt_resources = data["mqtt_resources"]
 
 broker_address = mqtt_resources["BROKER_ADDRESS"]
-topics = [mqtt_resources["LIGHT_DATA_TOPIC"], mqtt_resources["MOISTURE_DATA_TOPIC"], mqtt_resources["WATERPUMP_ERROR_TOPIC"]]
+topics = [mqtt_resources["LIGHT_DATA_TOPIC"], mqtt_resources["MOISTURE_DATA_TOPIC"],mqtt_resources["HUMIDITY_DATA_TOPIC"], mqtt_resources["TEMPERATURE_DATA_TOPIC"], mqtt_resources["WATERPUMP_ERROR_TOPIC"]]
 broker_port = mqtt_resources["BROKER_PORT"]
 
 class MQTTSubscriber:

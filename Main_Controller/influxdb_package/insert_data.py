@@ -12,12 +12,20 @@ with open(yaml_path, 'r') as f:
 topics = [
     mqtt_resources["LIGHT_DATA_TOPIC"],
     mqtt_resources["MOISTURE_DATA_TOPIC"],
+    mqtt_resources["HUMIDITY_DATA_TOPIC"],
+    mqtt_resources["TEMPERATURE_DATA_TOPIC"],
     mqtt_resources["WATERPUMP_ERROR_TOPIC"]
 ]
 
-token = "secret_token"
-org = "my_org"
-url = "http://influxdb:8086"
+#Get InfluxDB Configs from config.yaml
+dir_path = os.path.dirname(os.path.realpath(__file__))
+yaml_path = os.path.join(dir_path, 'config.yaml')
+with open(yaml_path, 'r') as f:
+    data = yaml.safe_load(f)
+    influxdb_config = data["influxdb_config"]
+token = influxdb_config["token"]
+org = influxdb_config["org"]
+url = influxdb_config["url"]
 
 write_client = InfluxDBClient(url=url, token=token, org=org)
 
@@ -32,6 +40,10 @@ def write_data(topic, value):
         measurement_name = "light"
     elif topic == mqtt_resources["MOISTURE_DATA_TOPIC"]:
         measurement_name = "moisture"
+    elif topic == mqtt_resources["HUMIDITY_DATA_TOPIC"]:
+        measurement_name = "humidity"
+    elif topic == mqtt_resources["TEMPERATURE_DATA_TOPIC"]:
+        measurement_name = "temperature"
     elif topic == mqtt_resources["WATERPUMP_ERROR_TOPIC"]:
         measurement_name = "pump_error"
     else:
