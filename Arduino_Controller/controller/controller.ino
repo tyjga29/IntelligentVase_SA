@@ -1,5 +1,6 @@
 #include <ArduinoMqttClient.h>
 #include <WiFiS3.h>
+#include "Adafruit_SHT4x.h"
 
 #include "arduino_secrets/arduino_secrets.h"
 
@@ -14,6 +15,8 @@ const int mqtt_port = MQTT_PORT;
 //MQTT Topics
 const char* light_topic = LIGHT_DATA_TOPIC;
 const char* moisture_topic = MOISTURE_DATA_TOPIC;
+const char* temperature_topic = TEMPERATURE_DATA_TOPIC;
+const char* humidity_topic = HUMIDITY_DATA_TOPIC;
 const char* waterpump_activate_topic = WATERPUMP_ACTIVATE_TOPIC;
 const char* waterpump_error_topic = WATERPUMP_ERROR_TOPIC;
 
@@ -34,10 +37,14 @@ const int moisture_margin_of_error = MOISTURE_MARGIN;
 
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
+Adafruit_SHT4x sht4 = Adafruit_SHT4x();
 
 void setup() {
   //Initialize serial and wait for port to open:
   Serial.begin(9600);
+
+  while (!Serial)
+    delay(10);
 
   setupWifiAndMQTT();
   //setup MQTT Message receiver
@@ -57,6 +64,62 @@ void setupSensors() {
   pinMode(LightAnalog_Input, INPUT);
   pinMode(WaterpumpDigital_Output, OUTPUT);
   pinMode(MoistureAnalog_Input, INPUT);
+  setupSHT4();
+  
+}
+
+void setupSHT4() {
+  Serial.println("Trying to connect to Adafruit SHT4x:");
+  /*while (!sht4.begin()) {
+    Serial.println("Couldn't find SHT4x");
+    delay(3000);
+  }
+
+  Serial.println("Found SHT4x sensor");
+  Serial.print("Serial number 0x");
+  Serial.println(sht4.readSerial(), HEX);
+
+  // You can have 3 different precisions, higher precision takes longer
+  sht4.setPrecision(SHT4X_HIGH_PRECISION);
+  switch (sht4.getPrecision()) {
+     case SHT4X_HIGH_PRECISION: 
+       Serial.println("High precision");
+       break;
+     case SHT4X_MED_PRECISION: 
+       Serial.println("Med precision");
+       break;
+     case SHT4X_LOW_PRECISION: 
+       Serial.println("Low precision");
+       break;
+  }
+
+  // You can have 6 different heater settings
+  // higher heat and longer times uses more power
+  // and reads will take longer too!
+  sht4.setHeater(SHT4X_NO_HEATER);
+  switch (sht4.getHeater()) {
+     case SHT4X_NO_HEATER: 
+       Serial.println("No heater");
+       break;
+     case SHT4X_HIGH_HEATER_1S: 
+       Serial.println("High heat for 1 second");
+       break;
+     case SHT4X_HIGH_HEATER_100MS: 
+       Serial.println("High heat for 0.1 second");
+       break;
+     case SHT4X_MED_HEATER_1S: 
+       Serial.println("Medium heat for 1 second");
+       break;
+     case SHT4X_MED_HEATER_100MS: 
+       Serial.println("Medium heat for 0.1 second");
+       break;
+     case SHT4X_LOW_HEATER_1S: 
+       Serial.println("Low heat for 1 second");
+       break;
+     case SHT4X_LOW_HEATER_100MS: 
+       Serial.println("Low heat for 0.1 second");
+       break;
+  }*/
 }
 
 void setupWifiAndMQTT() {
@@ -79,7 +142,7 @@ void setupWifiAndMQTT() {
     Serial.print("MQTT connection failed! Error code = ");
     Serial.print(mqttClient.connectError());
     Serial.println(". Retrying...");
-    delay(5000);
+    delay(2000);
   }
 
   Serial.println("You're connected to the MQTT broker!");
@@ -96,6 +159,8 @@ void setupMQTTReceiver() {
 void readAndSendMeasurements() {
   int light_value = analogRead(LightAnalog_Input);
   int moisture_value = analogRead(MoistureAnalog_Input);
+  //sensors_event_t humidity, temp;   //SHT4x values
+  //sht4.getEvent(&humidity, &temp);  //populate temp and humidity ;
 
   Serial.print("Light Value: ");
   Serial.println(light_value);
@@ -104,6 +169,14 @@ void readAndSendMeasurements() {
   Serial.print("Moisture Value: ");
   Serial.println(moisture_value);
   sendDataOverMQTT(moisture_value, moisture_topic);
+
+  Serial.print("Temperature Value(in °C): ");
+  Serial.println(temp.temperature);
+  sendDataOverMQTT(temp.temperature, temperature_topic);
+
+  Serial.print("Humidity Value(in %rH): ");
+  Serial.println(humidity.relative_humidity);
+  sendDataOverMQTT(humidity.relative_humidity, humidity_topic);
 }
 
 void sendDataOverMQTT(int data, const char* topic) {
