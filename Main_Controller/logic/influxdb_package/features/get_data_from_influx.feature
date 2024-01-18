@@ -3,6 +3,6 @@ Feature: Retrieving Data from influx
     We need to regularly retrieve data from the database
     To work with more data we will get every minute the last 5 data_entries of the database
 
-    Scenario: One minute is overnjjn
+    Scenario: One minute is over
         Given it has been a minute since the last retrieval
         Then we will get the last 5 data_entries from InfluxDB
