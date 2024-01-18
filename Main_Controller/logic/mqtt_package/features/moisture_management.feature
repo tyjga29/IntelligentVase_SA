@@ -1,13 +1,17 @@
 Feature: Moisture Management
 
-  Scenario: Responding to Moisture Levels
+  Scenario: Water Pump Activation
+    Given the moisture level is too low
+    When we activate the pump
+    Then the pump should run for 5 seconds
 
-    Given the moisture level is way too low
-      When I activate the pump
-      Then the moisture level should reach the desired level
+  Scenario Outline: Moisture at Perfect Level or Above
+    Given the moisture level is <moisture>
+    When we check the moisture level
+    Then we should not activate the pump
 
-    Given the moisture level is the same or slightly above or under the desired level
-      Then I don't do anything
-
-    Given the moisture level is way too high
-      Then I notify the user
+    Examples:
+      | moisture |
+      | 100%     |
+      | 95%      |
+      | 105%     |

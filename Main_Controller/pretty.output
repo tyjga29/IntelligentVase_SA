@@ -1,44 +1,22 @@
 Feature: Moisture Management # logic/mqtt_package/features/moisture_management.feature:1
 
-  Scenario: Responding to Moisture Levels                                             # logic/mqtt_package/features/moisture_management.feature:3
-    Given the moisture level is way too low                                           # logic/mqtt_package/features/steps/moisture_management.py:5
-    When I activate the pump                                                          # logic/mqtt_package/features/steps/moisture_management.py:9
-      Traceback (most recent call last):
-        File "C:\Users\rechn\AppData\Local\Programs\Python\Python312\Lib\site-packages\behave\model.py", line 1329, in run
-          match.run(runner.context)
-        File "C:\Users\rechn\AppData\Local\Programs\Python\Python312\Lib\site-packages\behave\matchers.py", line 98, in run
-          self.func(context, *args, **kwargs)
-        File "logic\mqtt_package\features\steps\moisture_management.py", line 12, in activate_pump
-          context.moisture_level = activate_pump(7)
-                                   ^^^^^^^^^^^^^^^^
-        File "logic\mqtt_package\features\steps\moisture_management.py", line 12, in activate_pump
-          context.moisture_level = activate_pump(7)
-                                   ^^^^^^^^^^^^^^^^
-        File "logic\mqtt_package\features\steps\moisture_management.py", line 12, in activate_pump
-          context.moisture_level = activate_pump(7)
-                                   ^^^^^^^^^^^^^^^^
-        [Previous line repeated 985 more times]
-      RecursionError: maximum recursion depth exceeded
+  Scenario: Water Pump Activation          # logic/mqtt_package/features/moisture_management.feature:3
+    Given the moisture level is too low    # logic/mqtt_package/features/steps/moisture_management.py:21
+    When we activate the pump              # logic/mqtt_package/features/steps/moisture_management.py:10
+    Then the pump should run for 5 seconds # logic/mqtt_package/features/steps/moisture_management.py:17
 
-    Then the moisture level should reach the desired level                            # None
-    Given the moisture level is the same or slightly above or under the desired level # None
-    Then I don't do anything                                                          # None
-    Given the moisture level is way too high                                          # None
-    Then I notify the user                                                            # None
+  Scenario Outline: Moisture at Perfect Level or Above -- @1.1   # logic/mqtt_package/features/moisture_management.feature:15
+    Given the moisture level is 100%                             # logic/mqtt_package/features/steps/moisture_management.py:21
+    When we check the moisture level                             # logic/mqtt_package/features/steps/moisture_management.py:30
+    Then we should not activate the pump                         # logic/mqtt_package/features/steps/moisture_management.py:35
 
-Feature: showing off behave # logic/mqtt_package/features/tutorial.feature:1
+  Scenario Outline: Moisture at Perfect Level or Above -- @1.2   # logic/mqtt_package/features/moisture_management.feature:16
+    Given the moisture level is 95%                              # logic/mqtt_package/features/steps/moisture_management.py:21
+    When we check the moisture level                             # logic/mqtt_package/features/steps/moisture_management.py:30
+    Then we should not activate the pump                         # logic/mqtt_package/features/steps/moisture_management.py:35
 
-  Scenario: run a simple test        # logic/mqtt_package/features/tutorial.feature:3
-    Given we have behave installed   # logic/mqtt_package/features/steps/tutorial.py:3
-    When we implement a test         # logic/mqtt_package/features/steps/tutorial.py:7
-    Then behave will test it for us! # logic/mqtt_package/features/steps/tutorial.py:11
-      Traceback (most recent call last):
-        File "C:\Users\rechn\AppData\Local\Programs\Python\Python312\Lib\site-packages\behave\model.py", line 1329, in run
-          match.run(runner.context)
-        File "C:\Users\rechn\AppData\Local\Programs\Python\Python312\Lib\site-packages\behave\matchers.py", line 98, in run
-          self.func(context, *args, **kwargs)
-        File "logic\mqtt_package\features\steps\tutorial.py", line 13, in step_impl
-          assert context.failed is False
-      AssertionError
-
+  Scenario Outline: Moisture at Perfect Level or Above -- @1.3   # logic/mqtt_package/features/moisture_management.feature:17
+    Given the moisture level is 105%                             # logic/mqtt_package/features/steps/moisture_management.py:21
+    When we check the moisture level                             # logic/mqtt_package/features/steps/moisture_management.py:30
+    Then we should not activate the pump                         # logic/mqtt_package/features/steps/moisture_management.py:35
 
