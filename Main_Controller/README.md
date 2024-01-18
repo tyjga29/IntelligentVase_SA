@@ -16,7 +16,7 @@ To log into InfluxDB use:
 user: root
 password: secret_password
 
-Needed libraries:
-    pymongo
-    yaml
-    paho.mqtt.client
+Virtual environment:
+To install librarys: pip install -r requirements.txt
+To save changes: pip freeze > requirements.txt
+

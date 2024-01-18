@@ -2,40 +2,26 @@ import os, yaml
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
-from logic.mqtt_package.get_mqtt_config import get_mqtt_subscriber_topics
+from logic.mqtt_package.get_mqtt_config import get_topic_mapping
 from logic.influxdb_package.get_influx_config import get_influx_config
 
 #Get Topics from mqtt_resources.yaml
-mqtt_topics = get_mqtt_subscriber_topics
+topic_mapping = get_topic_mapping()
 
 #Get InfluxDB Configs from config.yaml
-token, org, url = get_influx_config()
-
+token, org, url , bucket= get_influx_config()
+#Initialize Client
 write_client = InfluxDBClient(url=url, token=token, org=org)
-
-bucket= "my_bucket"
-
 write_api = write_client.write_api(write_options=SYNCHRONOUS)
    
 def write_data(topic, value):
-    measurement_name = ""
-
-    #TODO very clunky
-    if topic == mqtt_topics["LIGHT_DATA_TOPIC"]:
-        measurement_name = "light"
-    elif topic == mqtt_topics["MOISTURE_DATA_TOPIC"]:
-        measurement_name = "moisture"
-    elif topic == mqtt_topics["HUMIDITY_DATA_TOPIC"]:
-        measurement_name = "humidity"
-    elif topic == mqtt_topics["TEMPERATURE_DATA_TOPIC"]:
-        measurement_name = "temperature"
-    elif topic == mqtt_topics["WATERPUMP_ERROR_TOPIC"]:
-        measurement_name = "pump_error"
-    else:
-        # Handle unknown topics, if needed
-        pass
-
-    if measurement_name:
+    measurement_name = None
+    for topic_info in topic_mapping:
+        if topic == topic_info["MQTT_TOPIC"]:
+            measurement_name = topic_info["TABLE_NAME"]
+            break
+    
+    if measurement_name is not None:
         value = float(value)
         point = (
             Point(measurement_name)
@@ -44,3 +30,5 @@ def write_data(topic, value):
         )
         write_api.write(bucket=bucket, org=org, record=point)
         print(f"Sent data to datapoint: {measurement_name}")
+    else:
+        print("Unknown topic received")

@@ -1,0 +1,18 @@
+#Compiled Pyhton
+*.pyc
+*.pyo
+__pycache__/
+.pytest_cache/
+
+venv/
+
+#IDE specific
+.vscode/
+.idea/
+
+
+#Generally don't track yaml files
+*.yaml
+#Except:
+!blueprint_mqtt_subscriber.yaml
+!blueprint_influx_config.yaml

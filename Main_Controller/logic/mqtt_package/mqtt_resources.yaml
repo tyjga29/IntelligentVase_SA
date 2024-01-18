@@ -1,9 +1,18 @@
 mqtt_resources:
   BROKER_ADDRESS: "test.mosquitto.org"
   BROKER_PORT: 1883
-  LIGHT_DATA_TOPIC: "light_ard"
-  MOISTURE_DATA_TOPIC: "moisture_ard"
-  HUMIDITY_DATA_TOPIC: "humidity_ard"
-  TEMPERATURE_DATA_TOPIC: "temperature_ard"
-  WATERPUMP_ACTIVATE_TOPIC: "waterpump_activate_ard"
-  WATERPUMP_ERROR_TOPIC: "waterpump_error_ard"
+  SUBSCRIBER_TOPICS:
+    - MQTT_TOPIC: "light_ard"
+      TABLE_NAME: "light"
+    - MQTT_TOPIC: "moisture_ard"
+      TABLE_NAME: "moisture"
+    - MQTT_TOPIC: "humidity_ard"
+      TABLE_NAME: "humidity"
+    - MQTT_TOPIC: "temperature_ard"
+      TABLE_NAME: "temperature"
+    - MQTT_TOPIC: "waterpump_error_ard"
+      TABLE_NAME: "waterpump_error"
+  SENDER_TOPICS:
+    - MQTT_TOPIC: "waterpump_activate_ard"
+      TABLE_NAME: "waterpump_activate"
+
