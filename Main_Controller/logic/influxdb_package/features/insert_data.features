@@ -1,0 +1,37 @@
+Feature: Write Data into the database
+    When we receive data through MQTT
+    We have to check if it is a valid topic
+    If the data matched we will paste it into the database
+
+    Background:
+    Given the list of valid topics:
+      | topic               |
+      | light_ard           | 
+      | moisture_ard        |
+      | humidity_ard        |
+      | temperature_ard     |
+      | waterpump_error_ard |
+
+  Scenario: Valid Topic
+    Given we receive information with a valid topic
+    When it matches one of our valid topics
+    Then we write it into influx
+
+    Examples:
+      | received_topic      |
+      | light_ard           |
+      | moisture_ard        |
+      | humidity_ard        |
+      | temperature_ard     |
+      | waterpump_error_ard |
+
+  Scenario: Invalid Topic
+    Given we receive information with an invalid topic
+    When it doesn't match any of our valid topics
+    Then we send an error
+
+    Examples:
+      | received_topic      |
+      | invalid_topic_1     |
+      | invalid_topic_2     |
+      | invalid_topic_3     |

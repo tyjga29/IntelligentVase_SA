@@ -14,5 +14,5 @@ venv/
 #Generally don't track yaml files
 *.yaml
 #Except:
-!blueprint_mqtt_subscriber.yaml
+!blueprint_mqtt_resources.yaml
 !blueprint_influx_config.yaml
