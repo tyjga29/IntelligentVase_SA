@@ -1,5 +1,0 @@
-influxdb_config:
-  org: "my_org"
-  url: "http://influxdb:8086"
-  token: "secret_token"
-  bucket: "my_bucket"
