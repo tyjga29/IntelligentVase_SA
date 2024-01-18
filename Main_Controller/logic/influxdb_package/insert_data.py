@@ -1,31 +1,15 @@
-import influxdb_client, os, time, yaml
-from influxdb_client import InfluxDBClient, Point, WritePrecision
+import os, yaml
+from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
+from logic.mqtt_package.get_mqtt_config import get_mqtt_subscriber_topics
+from logic.influxdb_package.get_influx_config import get_influx_config
+
 #Get Topics from mqtt_resources.yaml
-dir_path = os.path.dirname(os.path.realpath(__file__))
-project_root = os.path.abspath(os.path.join(dir_path, os.pardir))
-yaml_path = os.path.join(project_root, 'mqtt_package', 'mqtt_resources.yaml')
-with open(yaml_path, 'r') as f:
-    data = yaml.safe_load(f)
-    mqtt_resources = data["mqtt_resources"]
-topics = [
-    mqtt_resources["LIGHT_DATA_TOPIC"],
-    mqtt_resources["MOISTURE_DATA_TOPIC"],
-    mqtt_resources["HUMIDITY_DATA_TOPIC"],
-    mqtt_resources["TEMPERATURE_DATA_TOPIC"],
-    mqtt_resources["WATERPUMP_ERROR_TOPIC"]
-]
+mqtt_topics = get_mqtt_subscriber_topics
 
 #Get InfluxDB Configs from config.yaml
-dir_path = os.path.dirname(os.path.realpath(__file__))
-yaml_path = os.path.join(dir_path, 'config.yaml')
-with open(yaml_path, 'r') as f:
-    data = yaml.safe_load(f)
-    influxdb_config = data["influxdb_config"]
-token = influxdb_config["token"]
-org = influxdb_config["org"]
-url = influxdb_config["url"]
+token, org, url = get_influx_config()
 
 write_client = InfluxDBClient(url=url, token=token, org=org)
 
@@ -36,15 +20,16 @@ write_api = write_client.write_api(write_options=SYNCHRONOUS)
 def write_data(topic, value):
     measurement_name = ""
 
-    if topic == mqtt_resources["LIGHT_DATA_TOPIC"]:
+    #TODO very clunky
+    if topic == mqtt_topics["LIGHT_DATA_TOPIC"]:
         measurement_name = "light"
-    elif topic == mqtt_resources["MOISTURE_DATA_TOPIC"]:
+    elif topic == mqtt_topics["MOISTURE_DATA_TOPIC"]:
         measurement_name = "moisture"
-    elif topic == mqtt_resources["HUMIDITY_DATA_TOPIC"]:
+    elif topic == mqtt_topics["HUMIDITY_DATA_TOPIC"]:
         measurement_name = "humidity"
-    elif topic == mqtt_resources["TEMPERATURE_DATA_TOPIC"]:
+    elif topic == mqtt_topics["TEMPERATURE_DATA_TOPIC"]:
         measurement_name = "temperature"
-    elif topic == mqtt_resources["WATERPUMP_ERROR_TOPIC"]:
+    elif topic == mqtt_topics["WATERPUMP_ERROR_TOPIC"]:
         measurement_name = "pump_error"
     else:
         # Handle unknown topics, if needed

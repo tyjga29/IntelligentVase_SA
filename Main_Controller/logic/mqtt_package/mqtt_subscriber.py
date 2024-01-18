@@ -1,6 +1,4 @@
 import paho.mqtt.client as mqtt
-import yaml
-import os
 
 from .get_mqtt_config import get_mqtt_address_and_port, get_mqtt_subscriber_topics
 from ..influxdb_package.insert_data import write_data

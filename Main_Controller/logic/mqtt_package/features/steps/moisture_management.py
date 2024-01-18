@@ -1,37 +1,22 @@
 from behave import given, when, then
-import time
+from assertpy import assert_that
 
 from logic.mqtt_package.mqtt_waterpump_sender import activate_pump
 
-@given('the moisture level is way too low')
-def step_moisture_way_too_low(context):
-    context.moisture_level = 3 #Moisture Level that is too low
+@given('the optimal moisture level is {optimal_moisture}')
+def step_given_optimal_moisture(context, optimal_moisture):
+    context.optimal_moisture = float(optimal_moisture.rstrip('%'))
 
-@when('we activate the pump')
-def step_activate_pump(context):
-    # Simulate activating the pump
-    context.activation_time = 5  #Simulate running the pump for 5 seconds
+@when('the actual moisture level is {actual_moisture}')
+def step_when_actual_moisture(context, actual_moisture):
+    context.actual_moisture = float(actual_moisture.rstrip('%'))
+
+@then('the pump is activated')
+def step_then_pump_activated(context):
+    assert_that(context.actual_moisture).is_less_than(context.optimal_moisture)
     activate_pump(context.activation_time)
-    time.sleep(context.activation_time)  #Simulate the pump running
 
-@then('the pump should run for 5 seconds')
-def step_pump_runs_for_5_seconds(context):
-    assert context.activation_time == 5, "Pump should run for 5 seconds"
-
-@given('the moisture level is {moisture}')
-def step_moisture_above_or_at_perfect_level(context, moisture):
-    if moisture.lower() == 'too low':
-        context.moisture_level = 3
-    elif '%' in moisture:
-        context.moisture_level = float(moisture.rstrip('%'))
-    else:
-        context.moisture_level = float(moisture)
-
-@when('we check the moisture level')
-def step_check_moisture_level(context):
-    # Simulate checking moisture level (replace this with your actual code)
-    context.pump_activated = False
-
-@then('we should not activate the pump')
-def step_no_pump_activation(context):
-    assert not context.pump_activated, "Pump should not be activated"
+@then('we won\'t do anything')
+def step_then_nothing(context):
+    assert_that(context.actual_moisture).is_greater_than_or_equal_to(context.optimal_moisture)
+    # No pump activation
