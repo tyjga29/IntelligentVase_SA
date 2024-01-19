@@ -8,7 +8,7 @@ Feature: Moisture Management for different plants
         Given the system is ready to manage soil moisture
 
         Examples:
-            | Plant Type | Optimal Moisture Level | Mean Moisture Level | Action           |
+            | Plant Type  | Optimal Moisture Level  | Mean Moisture Level | Action            |
             | Cactus      | 10                      | 5                   | Activate Pump     |  # Below optimal for cactus
             | Cactus      | 10                      | 10                  | Do Nothing        |  # Optimal for cactus
             | Cactus      | 10                      | 15                  | Alert User        |  # Too high for cactus
