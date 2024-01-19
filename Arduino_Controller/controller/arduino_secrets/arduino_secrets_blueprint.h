@@ -9,6 +9,8 @@
 
 #define LIGHT_DATA_TOPIC "your_light_topic"
 #define MOISTURE_DATA_TOPIC "your_moisture_topic"
+#define TEMPERATURE_DATA_TOPIC "temperature_ard"
+#define HUMIDITY_DATA_TOPIC "humidity_ard"
 #define WATERPUMP_ACTIVATE_TOPIC "waterpump_activate_topic"
 #define WATERPUMP_ERROR_TOPIC "waterpump_error_topic"
 
@@ -18,11 +20,6 @@
 #define LIGHT_ANALOG_INPUT 0
 #define WATERPUMP_DIGITAL_OUTPUT 0
 #define MOISTURE_ANALOG_INPUT 0
-
-#define WATERPUMP_ACTIVATION 5
-#define WATERPUMP_PAUSE 5
-#define WATERPUMP_TRIES 5
-#define MOISTURE_MARGIN 5
-
+#define TEMPERATURE_HUMIDITY_DIGITAL_INPUT 0
 
 #endif

@@ -3,13 +3,11 @@
 *.pyo
 __pycache__/
 .pytest_cache/
-
 venv/
 
 #IDE specific
 .vscode/
 .idea/
-
 
 #Generally don't track yaml files
 *.yaml
