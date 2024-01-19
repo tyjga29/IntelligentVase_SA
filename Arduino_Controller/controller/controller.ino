@@ -1,6 +1,6 @@
 #include <ArduinoMqttClient.h>
 #include <WiFiS3.h>
-#include "Adafruit_SHT4x.h"
+#include "DHT.h"
 
 #include "arduino_secrets/arduino_secrets.h"
 
@@ -23,21 +23,20 @@ const char* waterpump_error_topic = WATERPUMP_ERROR_TOPIC;
 //How often Sensor Data is send
 const long interval = INTERVAL_SEND;
 
-//ARduino Board Configuration
+//Arduino Board Configuration
 const int LightDigital_Input = LIGHT_DIGITAL_INPUT;
 const int LightAnalog_Input = LIGHT_ANALOG_INPUT;
 const int WaterpumpDigital_Output = WATERPUMP_DIGITAL_OUTPUT;
 const int MoistureAnalog_Input = MOISTURE_ANALOG_INPUT;
+const int DHTPIN = TEMPERATURE_HUMIDITY_DIGITAL_INPUT;
 
-//Waterpump Controller, how long to pump, pause between pumps, and how many times to do it in a row
-const int waterpump_activation = WATERPUMP_ACTIVATION;
-const int waterpump_pause = WATERPUMP_PAUSE;
-const int waterpump_tries = WATERPUMP_TRIES;
-const int moisture_margin_of_error = MOISTURE_MARGIN;
+//Temperature and Humidity Sensor
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
 
+//WiFi and MQTT Client
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
-Adafruit_SHT4x sht4 = Adafruit_SHT4x();
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -64,62 +63,8 @@ void setupSensors() {
   pinMode(LightAnalog_Input, INPUT);
   pinMode(WaterpumpDigital_Output, OUTPUT);
   pinMode(MoistureAnalog_Input, INPUT);
-  setupSHT4();
+  dht.begin();
   
-}
-
-void setupSHT4() {
-  Serial.println("Trying to connect to Adafruit SHT4x:");
-  /*while (!sht4.begin()) {
-    Serial.println("Couldn't find SHT4x");
-    delay(3000);
-  }
-
-  Serial.println("Found SHT4x sensor");
-  Serial.print("Serial number 0x");
-  Serial.println(sht4.readSerial(), HEX);
-
-  // You can have 3 different precisions, higher precision takes longer
-  sht4.setPrecision(SHT4X_HIGH_PRECISION);
-  switch (sht4.getPrecision()) {
-     case SHT4X_HIGH_PRECISION: 
-       Serial.println("High precision");
-       break;
-     case SHT4X_MED_PRECISION: 
-       Serial.println("Med precision");
-       break;
-     case SHT4X_LOW_PRECISION: 
-       Serial.println("Low precision");
-       break;
-  }
-
-  // You can have 6 different heater settings
-  // higher heat and longer times uses more power
-  // and reads will take longer too!
-  sht4.setHeater(SHT4X_NO_HEATER);
-  switch (sht4.getHeater()) {
-     case SHT4X_NO_HEATER: 
-       Serial.println("No heater");
-       break;
-     case SHT4X_HIGH_HEATER_1S: 
-       Serial.println("High heat for 1 second");
-       break;
-     case SHT4X_HIGH_HEATER_100MS: 
-       Serial.println("High heat for 0.1 second");
-       break;
-     case SHT4X_MED_HEATER_1S: 
-       Serial.println("Medium heat for 1 second");
-       break;
-     case SHT4X_MED_HEATER_100MS: 
-       Serial.println("Medium heat for 0.1 second");
-       break;
-     case SHT4X_LOW_HEATER_1S: 
-       Serial.println("Low heat for 1 second");
-       break;
-     case SHT4X_LOW_HEATER_100MS: 
-       Serial.println("Low heat for 0.1 second");
-       break;
-  }*/
 }
 
 void setupWifiAndMQTT() {
@@ -159,8 +104,8 @@ void setupMQTTReceiver() {
 void readAndSendMeasurements() {
   int light_value = analogRead(LightAnalog_Input);
   int moisture_value = analogRead(MoistureAnalog_Input);
-  //sensors_event_t humidity, temp;   //SHT4x values
-  //sht4.getEvent(&humidity, &temp);  //populate temp and humidity ;
+  float temperature_value = dht.readTemperature();
+  float humidity_value = dht.readHumidity();
 
   Serial.print("Light Value: ");
   Serial.println(light_value);
@@ -171,12 +116,12 @@ void readAndSendMeasurements() {
   sendDataOverMQTT(moisture_value, moisture_topic);
 
   Serial.print("Temperature Value(in °C): ");
-  Serial.println(temp.temperature);
-  sendDataOverMQTT(temp.temperature, temperature_topic);
+  Serial.println(temperature_value);
+  sendDataOverMQTT(temperature_value, temperature_topic);
 
   Serial.print("Humidity Value(in %rH): ");
-  Serial.println(humidity.relative_humidity);
-  sendDataOverMQTT(humidity.relative_humidity, humidity_topic);
+  Serial.println(humidity_value);
+  sendDataOverMQTT(humidity_value, humidity_topic);
 }
 
 void sendDataOverMQTT(int data, const char* topic) {
@@ -223,46 +168,16 @@ void onMqttMessage(int messageSize) {
   }
 }
 
-void activate_pump_to_moisture_level(int value_to_reach) {
-  bool level_reached = false;
-  int error = 0;
-  int beginning_moisture_level = analogRead(MoistureAnalog_Input);
-  while (!level_reached) {
-    int moisture_value = analogRead(MoistureAnalog_Input);
-    if (error >= waterpump_tries) {
-      if (moisture_value <= (beginning_moisture_level + moisture_margin_of_error)) {
-        Serial.println("Error. Waterpump not working.");
-        level_reached = true;
-        sendWaterpumpError();
-      }
-      else {
-        error = 0;
-        beginning_moisture_level = moisture_value;
-      }
-    }
-    else if (moisture_value < value_to_reach) {
-      Serial.print("Waterpump pumping for ");
-      Serial.print(waterpump_activation);
-      Serial.println(" seconds.");
-
-      digitalWrite(WaterpumpDigital_Output, HIGH);
-      delay(5000);  //5 Seconds
-      digitalWrite(WaterpumpDigital_Output, LOW);
-
-      error = error + 1;
-      Serial.print("Trying ");
-      Serial.print(waterpump_tries - error);
-      Serial.println(" more times.");
-
-      delay(10000); //10 Seconds
-    }
-    else {
-      Serial.println("Sufficient Moisture Level.");
-      level_reached = true;
-    }
-  }
+void activate_pump_to_moisture_level(int waterpump_activation) {
+  Serial.print("Waterpump pumping for ");
+  Serial.print(waterpump_activation);
+  Serial.println(" seconds.");
+  digitalWrite(WaterpumpDigital_Output, HIGH);
+  delay(5000);  //5 Seconds
+  digitalWrite(WaterpumpDigital_Output, LOW);
 }
 
+//Currently not in use
 void sendWaterpumpError() {
   Serial.print("Sending data to topic: ");
   Serial.println(waterpump_error_topic);
