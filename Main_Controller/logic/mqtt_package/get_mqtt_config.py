@@ -24,6 +24,13 @@ def get_mqtt_subscriber_topics():
     ]
     return subscriber_topics
 
+def get_table_names():
+    mqtt_resources = load_mqtt_resources()
+    table_names = [
+        entry["TABLE_NAME"] for entry in mqtt_resources["SUBSCRIBER_TOPICS"]
+    ]
+    return table_names
+
 #Return all the Subscriber topics with their respecive Table names
 def get_topic_mapping():
     mqtt_resources = load_mqtt_resources()

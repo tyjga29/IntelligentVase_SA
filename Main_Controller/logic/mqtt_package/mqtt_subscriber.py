@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 
 from .get_mqtt_config import get_mqtt_address_and_port, get_mqtt_subscriber_topics
-from ..influxdb_package.insert_data import write_data
+from ..influxdb_package.database_handler import DatabaseHandler
 
 broker_address, broker_port = get_mqtt_address_and_port()
 topics = get_mqtt_subscriber_topics()
@@ -29,7 +29,8 @@ class MQTTSubscriber:
         payload = message.payload.decode("utf-8")
         print(f"Received message on topic '{message.topic}': {payload}")
 
-        write_data(message.topic, payload)   
+        db_handler = DatabaseHandler()
+        db_handler.write_data(message.topic, payload)
 
     def subscribe(self):
         self.client.connect(self.broker_address, self.broker_port)
