@@ -1,6 +1,7 @@
 import threading
 from logic.mqtt_package.mqtt_subscriber import MQTTSubscriber
 from logic.influxdb_package.database_handler import DatabaseHandler
+from logic.plants_config.plants_config_handler import import_plants_from_csv
 
 def calculation_thread(database_handler, calculator):
     while True:
@@ -9,6 +10,10 @@ def calculation_thread(database_handler, calculator):
         threading.Event().wait(60)
 
 if __name__ == "__main__":
+    import_plants_from_csv()
+
+
+
     # Create an instance of the MQTTSubscriber class
     subscriber = MQTTSubscriber()
     database_handler = DatabaseHandler()
