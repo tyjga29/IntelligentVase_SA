@@ -12,8 +12,6 @@ def calculation_thread(database_handler, calculator):
 if __name__ == "__main__":
     import_plants_from_csv()
 
-
-
     # Create an instance of the MQTTSubscriber class
     subscriber = MQTTSubscriber()
     database_handler = DatabaseHandler()

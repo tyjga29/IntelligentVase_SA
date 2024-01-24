@@ -8,12 +8,13 @@ plant_mapping = get_plants_columns_mapping()
 file_path = "Main_Controller/logic/plants_config/plants.csv"
 
 def import_plants_from_csv():
+    print("Trying to import the comparison plants data from the csv file")
     try:
         # Read the CSV file into a DataFrame
         df = pd.read_csv(file_path, delimiter=';', encoding='utf-8')
 
         if df.empty:
-            raise ValueError("The DataFrame is empty. No data to process.")
+            raise ValueError("The Plants DataFrame is empty. No data to process.")
 
         plants_data_list = []
 
@@ -33,6 +34,7 @@ def import_plants_from_csv():
         
         plants_json = change_mapping(plants_json)
 
+        print("Plants from csv successfully imported")
         return plants_json
 
     except Exception as e:
@@ -41,6 +43,7 @@ def import_plants_from_csv():
         return []
     
 def change_mapping(plants_json):
+    print("Remapping comparison-plants-table")
     data = json.loads(plants_json)
 
     for obj in data:
