@@ -38,7 +38,7 @@ jobs:
     - name: Decrypt and use sensitive file
       run: |
         cd Main_Controller/logic
-        openssl aes-256-cbc -K ${{ secrets.ENCRYPTION_KEY }} -iv ${{ secrets.ENCRYPTION_IV }} -in mqtt_package/mqtt_resources.yaml.enc -out logic/mqtt_package/mqtt_resources.yaml -d
+        openssl aes-256-cbc -K ${{ secrets.ENCRYPTION_KEY }} -iv ${{ secrets.ENCRYPTION_IV }} -in mqtt_package/mqtt_resources.yaml.enc -out mqtt_package/mqtt_resources.yaml -d
         openssl aes-256-cbc -K ${{ secrets.ENCRYPTION_KEY }} -iv ${{ secrets.ENCRYPTION_IV }} -in influxdb_package/influx_config.yaml.enc -out influx_config.yaml -d
         ls -R
         cat mqtt_package/mqtt_resources.yaml
