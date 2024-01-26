@@ -20,3 +20,8 @@ Virtual environment:
 To install librarys: pip install -r requirements.txt
 To save changes: pip freeze > requirements.txt
 
+Unittests:
+To run all unittests execute in the Main_Controller:
+    python -m unittest
+To run unittests run the specific test from the Main_Controller with this command:
+    python -m unittest test_mqtt_subscriber.py

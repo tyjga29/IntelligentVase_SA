@@ -3,7 +3,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 
 from .get_influx_config import get_table_topics, get_table_mapping, get_influx_config
 
-from .DatabaseHandler_functions.insert_data import insert_data
+from .DatabaseHandler_functions.helper_functions import insert_data, get_data
 
 class DatabaseHandler:
     def __init__(self):
@@ -21,26 +21,5 @@ class DatabaseHandler:
 
     # Retrieves the mean of all the tables in the last minute
     def retrieve_data(self):
-        print("Trying to retrieve Data from InfluxDB")
-        try:
-            # Construct and execute queries for each table
-            for table_name in self.table_names:
-                query = f"""from(bucket: "{self.bucket}")
-                    |> range(start: -1m)
-                    |> filter(fn: (r) => r._measurement == "{table_name}")
-                    |> mean()"""
-
-                # Execute query
-                tables = self.query_api.query(query, org=self.org)
-
-                # Check if there are any records
-                if tables and tables[0].records:
-                    # Print the results
-                    for table in tables:
-                        for record in table.records:
-                            print(record)
-                else:
-                    raise Exception(f"Error: No entries found in table {table_name}")
-
-        except Exception as e:
-            print(f"An unexpected error occurred: {str(e)}")
+        tables = get_data(self)
+        

@@ -4,14 +4,15 @@ from .get_mqtt_config import get_mqtt_address_and_port, get_mqtt_subscriber_topi
 from ..influxdb_package.database_handler import DatabaseHandler
 
 broker_address, broker_port = get_mqtt_address_and_port()
-topics = get_mqtt_subscriber_topics()
+subscriber_topics = get_mqtt_subscriber_topics()
 
 class MQTTSubscriber:
-    def __init__(self):
+    def __init__(self, db_handler):
         self.broker_address = broker_address
         self.broker_port = broker_port
         self.client = mqtt.Client()
         self.events = []
+        self.db_handler = db_handler
 
         # Set up the callback functions
         self.client.on_connect = self.on_connect
@@ -20,7 +21,7 @@ class MQTTSubscriber:
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             print("Connected to MQTT broker")
-            for topic in topics:
+            for topic in subscriber_topics:
                 client.subscribe(topic)
         else:
             print("Connection failed with code", rc)
@@ -29,8 +30,10 @@ class MQTTSubscriber:
         payload = message.payload.decode("utf-8")
         print(f"Received message on topic '{message.topic}': {payload}")
 
-        db_handler = DatabaseHandler()
-        db_handler.write_data(message.topic, payload)
+        if self.db_handler:
+            self.db_handler.write_data(message.topic, payload)
+        else:
+            print("InfluxDB is missing")
 
     def subscribe(self):
         self.client.connect(self.broker_address, self.broker_port)
