@@ -36,5 +36,6 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with unittest
       run: |
-        python -m unittest
+        python -m unittest discover -s Main_Controller/test -p 'test_*.py'
+      working-directory: Main_Controller
         
