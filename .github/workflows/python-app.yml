@@ -39,4 +39,5 @@ jobs:
       run: |
         cd Main_Controller
         python -m unittest
+      working-directory: Main_Controller
         
