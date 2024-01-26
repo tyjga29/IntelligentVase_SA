@@ -1,6 +1,6 @@
 import threading
 
-from logic.mqtt_package.mqtt_subscriber import MQTTSubscriber
+from Main_Controller.logic.mqtt_package.mqtt_client import MQTTClient
 from logic.influxdb_package.database_handler import DatabaseHandler
 from logic.response_package.response_handler import ResponseHandler
 from logic.plants_config.optimal_plant_environment import OptimalPlant
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     # Create an instance of the MQTTSubscriber class
     database_handler = DatabaseHandler()
-    subscriber = MQTTSubscriber(database_handler)
+    subscriber = MQTTClient(database_handler)
     
     #calculator = Calculator()
 

@@ -41,7 +41,5 @@ def get_topic_mapping():
 # Function to get Waterpump sender topic
 def get_mqtt_waterpump_activate_topic():
     mqtt_resources = load_mqtt_resources()
-    sender_topic = [
-        entry["MQTT_TOPIC"] for entry in mqtt_resources["SUBSCRIBER_TOPICS"]
-    ]
-    return sender_topic
+    waterpump_activate_topic = mqtt_resources.get("WATERPUMP_ACTIVATE_TOPIC", "")
+    return waterpump_activate_topic
