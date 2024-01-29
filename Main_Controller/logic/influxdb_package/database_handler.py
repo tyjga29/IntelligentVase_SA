@@ -19,7 +19,7 @@ class DatabaseHandler:
     def write_data(self, topic, value):
         insert_data(self, topic, value)
 
-    # Retrieves the mean of all the tables in the last minute
+    # Retrieves the mean of all the tables of the last minute
     def retrieve_data(self):
         tables = get_data(self)
         
