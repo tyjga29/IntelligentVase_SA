@@ -1,12 +1,12 @@
 import unittest
-from logic.plants_config.optimal_plant_environment import OptimalPlant, get_optimal_plants_as_list
-from logic.plants_config.optimal_plants_list_functions import get_optimal_plants_as_list, find_optimal_plant_by_name
+from logic.plants_config.optimal_plants.optimal_plant_environment import OptimalPlant, get_optimal_plants_as_list
+from logic.plants_config.optimal_plants.optimal_plants_list_functions import get_optimal_plants_as_list, find_optimal_plant_by_name
 
 class TestOptimalPlant(unittest.TestCase):
     def setUp(self):
         self.csv_row_tomato = ["Tomato", "15", "32", "65", "85", "immer leicht feucht", "3", "6", "direct"]
         self.csv_row_succulent = ["Succulent", "4", "27", "40", "50", "trocken", "120", "6", "shade", "Grows the best if it has constant, strong light. Should lay a bit in the shade. Be careful of direct sun. Ideally they should get a lot of air circulation."]
-        self.csv_file_path = "logic/plants_config/plants.csv"
+        self.csv_file_path = "logic/plants_config/optimal_plants/optimal_plants.csv"
         self.optimal_plants = OptimalPlant.load_from_csv(self.csv_file_path)
         self.expected_tomato = ["Tomato", "15", "32", "65", "85", "immer leicht feucht", "3", "6", "direct", '']
 

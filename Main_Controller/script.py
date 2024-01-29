@@ -3,8 +3,8 @@ import threading
 from logic.mqtt_package.mqtt_client import MQTTClient
 from logic.influxdb_package.database_handler import DatabaseHandler
 from logic.response_package.response_handler import ResponseHandler
-from logic.plants_config.optimal_plant_environment import OptimalPlant
-from logic.plants_config.plant_sensor_data import PlantSensorData
+from logic.plants_config.optimal_plants.optimal_plant_environment import OptimalPlant
+from logic.plants_config.plant_sensor_data.plant_sensor_data import PlantSensorData
 
 #TODO database of plants with the id of the arduino
 plant_name = "Succulent"

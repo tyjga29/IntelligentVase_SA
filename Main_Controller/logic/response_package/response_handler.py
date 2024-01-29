@@ -1,6 +1,6 @@
 import json
 
-from ..plants_config.optimal_plants_list_functions import find_optimal_plant_by_name
+from ..plants_config.optimal_plants.optimal_plants_list_functions import find_optimal_plant_by_name
 
 class ResponseHandler:
     def __init__(self):
