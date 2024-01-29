@@ -1,21 +1,25 @@
 from influxdb_client import Point
 
-def insert_data(self, topic, value):
+def insert_data(influx_write_api, influx_bucket, influx_org, table_mapping, table_topic, value):
     measurement_name = None
-    for topic_info in self.table_mapping:
-        if topic == topic_info["MQTT_TOPIC"]:
+    for topic_info in table_mapping:
+        if table_topic == topic_info["MQTT_TOPIC"]:
             measurement_name = topic_info["TABLE_NAME"]
             break
+    
+    tag = "SensorId"
+    tag_nr = "1"
+    field = "Measurement"
 
     if measurement_name is not None:
         value = float(value)
         point = (
             Point(measurement_name)
-            .tag("SensorId", "1")
-            .field("Measurement", value)
+            .tag(tag, tag_nr)
+            .field(field, value)
         )
-        self.write_api.write(bucket=self.bucket, org=self.org, record=point)
-        print(f"Sent data to datapoint: {measurement_name}")
+        influx_write_api.write(bucket=influx_bucket, org=influx_org, record=point)
+        print(f"Sent value {value} to datapoint: {measurement_name} on tag {tag} with the number {tag_nr} and the field {field}")
     else:
         print("Unknown topic received")
 

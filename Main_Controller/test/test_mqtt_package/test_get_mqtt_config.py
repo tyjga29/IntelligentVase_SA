@@ -1,7 +1,6 @@
 import unittest
 import tempfile
 import os
-import yaml
 from logic.mqtt_package.get_mqtt_config import load_mqtt_resources, get_mqtt_address_and_port, get_mqtt_subscriber_topics, get_table_names, get_topic_mapping, get_mqtt_waterpump_activate_topic
 
 class TestGetMqttConfig(unittest.TestCase):
@@ -31,7 +30,6 @@ class TestGetMqttConfig(unittest.TestCase):
         self.temp_file.close()
 
     def tearDown(self):
-        # Remove the temporary YAML file
         os.remove(self.temp_file.name)
 
     def test_yaml_content_match(self):

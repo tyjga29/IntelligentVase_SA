@@ -1,4 +1,4 @@
-from logic.influxdb_package.database_handler import DatabaseHandler
+from logic.database_package.database_handler import DatabaseHandler
 
 class PlantSensorData:
     def __init__(self, temperature, light, humidity, moisture):

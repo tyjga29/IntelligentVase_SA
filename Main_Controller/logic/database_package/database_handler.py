@@ -15,9 +15,9 @@ class DatabaseHandler:
         self.influx_client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
         self.write_api = self.influx_client.write_api(write_options=SYNCHRONOUS)
         self.query_api = self.influx_client.query_api()
-    
+
     def write_data(self, topic, value):
-        insert_data(self, topic, value)
+        insert_data(self.write_api, self.bucket, self.org, self.table_mapping, topic, value)
 
     # Retrieves the mean of all the tables of the last minute
     def retrieve_data(self):
