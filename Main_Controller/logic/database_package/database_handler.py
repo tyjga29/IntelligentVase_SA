@@ -22,4 +22,5 @@ class DatabaseHandler:
     # Retrieves the mean of all the tables of the last minute
     def retrieve_data(self):
         tables = get_data(self)
+        return tables
         

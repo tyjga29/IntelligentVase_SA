@@ -23,10 +23,11 @@ def insert_data(influx_write_api, influx_bucket, influx_org, table_mapping, tabl
     else:
         print("Unknown topic received")
 
-#TODO this doesn't work right now I need to find a way to automatically put the sensorData into the class PlantSensorData
 def get_data(self):
     print("Trying to retrieve Data from InfluxDB")
     try:
+        all_tables = []
+
         temperature = None
         light = None
         humidity = None
@@ -34,6 +35,7 @@ def get_data(self):
 
         # Construct and execute queries for each table
         for table_name in self.table_names:
+            print("Querying for table:", table_name)
             query = f"""from(bucket: "{self.bucket}")
                 |> range(start: -1m)
                 |> filter(fn: (r) => r._measurement == "{table_name}")
@@ -46,13 +48,17 @@ def get_data(self):
             if tables and tables[0].records:
                 # Print the results
                 for table in tables:
-                    for record in table.records:
-                        print(record)
-                
-                return tables
+                    all_tables.append(table)
+                    if table.records:
+                        for record in table.records:
+                            print("Record:", record)
+                    else:
+                        print(f"No records found in table {table_name}")
                 
             else:
-                raise Exception(f"Error: No entries found in table {table_name}")
+                print(f"No entries found in table {table_name}")
+                
+        return all_tables
 
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")

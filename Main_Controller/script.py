@@ -1,8 +1,8 @@
 import threading
 
 from logic.mqtt_package.mqtt_client import MQTTClient
-from logic.database_package.database_handler import DatabaseHandler
 from logic.response_package.response_handler import ResponseHandler
+from logic.database_package.database_handler import DatabaseHandler
 from logic.plants_config.optimal_plants.optimal_plant_environment import OptimalPlant
 from logic.plants_config.plant_sensor_data.plant_sensor_data import PlantSensorData
 
@@ -12,12 +12,9 @@ plant_name = "Succulent"
 def calculation_thread(database_handler, optimal_plants, calculator):
     while True:
         try:
-            real_plant = PlantSensorData.get_current_values()
-            influxdb_data = database_handler.retrieve_data()
-            if (influxdb_data is None):
-                raise ValueError("Values from InfluxDB cannot be None")
-            ResponseHandler.judge_environemnt(influxdb_data, optimal_plants, plant_name)
-            threading.Event().wait(60)
+            real_plant = PlantSensorData.get_current_values(database_handler)
+            #ResponseHandler.judge_environemnt(influxdb_data, optimal_plants, plant_name)
+            threading.Event().wait(30)
 
         except ValueError as ve:
             print(f"Error : {ve}")
