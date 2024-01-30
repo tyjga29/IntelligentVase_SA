@@ -4,11 +4,11 @@ from logic.plants_config.optimal_plants.optimal_plants_list_functions import get
 
 class TestOptimalPlant(unittest.TestCase):
     def setUp(self):
-        self.csv_row_tomato = ["Tomato", "15", "32", "65", "85", "immer leicht feucht", "3", "6", "direct"]
-        self.csv_row_succulent = ["Succulent", "4", "27", "40", "50", "trocken", "120", "6", "shade", "Grows the best if it has constant, strong light. Should lay a bit in the shade. Be careful of direct sun. Ideally they should get a lot of air circulation."]
+        self.csv_row_tomato = ["Tomato", "15", "32", "65", "85", 40, "50", "3", "6", "direct"]
+        self.csv_row_succulent = ["Succulent", "4", "27", "40", "50", "40", "50", "120", "6", "shade", "Grows the best if it has constant, strong light. Should lay a bit in the shade. Be careful of direct sun. Ideally they should get a lot of air circulation."]
         self.csv_file_path = "logic/plants_config/optimal_plants/optimal_plants.csv"
         self.optimal_plants = OptimalPlant.load_from_csv(self.csv_file_path)
-        self.expected_tomato = ["Tomato", "15", "32", "65", "85", "immer leicht feucht", "3", "6", "direct", '']
+        self.expected_tomato = ["Tomato", "15", "32", "65", "85", "40", "50", "3", "6", "direct", '']
 
     def test_initialization_tomato(self):
         optimal_plant = OptimalPlant(*self.csv_row_tomato)
@@ -18,7 +18,8 @@ class TestOptimalPlant(unittest.TestCase):
         self.assertEqual(optimal_plant.temperature_max, 32)
         self.assertEqual(optimal_plant.humidity_min, 65)
         self.assertEqual(optimal_plant.humidity_max, 85)
-        self.assertEqual(optimal_plant.moisture, "immer leicht feucht")
+        self.assertEqual(optimal_plant.moisture_min, 40)
+        self.assertEqual(optimal_plant.moisture_max, 50)
         self.assertEqual(optimal_plant.pause_for_watering, 3)
         self.assertEqual(optimal_plant.sun_min, 6)
         self.assertEqual(optimal_plant.sun_category, "direct")
@@ -32,7 +33,8 @@ class TestOptimalPlant(unittest.TestCase):
         self.assertEqual(optimal_plant.temperature_max, 27)
         self.assertEqual(optimal_plant.humidity_min, 40)
         self.assertEqual(optimal_plant.humidity_max, 50)
-        self.assertEqual(optimal_plant.moisture, "trocken")
+        self.assertEqual(optimal_plant.moisture_min, 40)
+        self.assertEqual(optimal_plant.moisture_max, 50)
         self.assertEqual(optimal_plant.pause_for_watering, 120)
         self.assertEqual(optimal_plant.sun_min, 6)
         self.assertEqual(optimal_plant.sun_category, "shade")
@@ -46,7 +48,8 @@ class TestOptimalPlant(unittest.TestCase):
         self.assertEqual(optimal_plant.temperature_max, 32)
         self.assertEqual(optimal_plant.humidity_min, 65)
         self.assertEqual(optimal_plant.humidity_max, 85)
-        self.assertEqual(optimal_plant.moisture, "immer leicht feucht")
+        self.assertEqual(optimal_plant.moisture_min, 40)
+        self.assertEqual(optimal_plant.moisture_max, 50)
         self.assertEqual(optimal_plant.pause_for_watering, 3)
         self.assertEqual(optimal_plant.sun_min, 6)
         self.assertEqual(optimal_plant.sun_category, "direct")
@@ -60,7 +63,8 @@ class TestOptimalPlant(unittest.TestCase):
         self.assertEqual(optimal_plant.temperature_max, 27)
         self.assertEqual(optimal_plant.humidity_min, 40)
         self.assertEqual(optimal_plant.humidity_max, 50)
-        self.assertEqual(optimal_plant.moisture, "trocken")
+        self.assertEqual(optimal_plant.moisture_min, 40)
+        self.assertEqual(optimal_plant.moisture_max, 50)
         self.assertEqual(optimal_plant.pause_for_watering, 120)
         self.assertEqual(optimal_plant.sun_min, 6)
         self.assertEqual(optimal_plant.sun_category, "shade")

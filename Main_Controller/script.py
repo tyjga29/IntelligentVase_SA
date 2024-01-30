@@ -9,11 +9,12 @@ from logic.plants_config.plant_sensor_data.plant_sensor_data import PlantSensorD
 #TODO database of plants with the id of the arduino
 plant_name = "Succulent"
 
-def calculation_thread(database_handler, optimal_plants, calculator):
+def calculation_thread(database_handler):
     while True:
         try:
+            optimal_plants = OptimalPlant.load_from_csv()
             real_plant = PlantSensorData.get_current_values(database_handler)
-            #ResponseHandler.judge_environemnt(influxdb_data, optimal_plants, plant_name)
+            ResponseHandler.judge_environemnt(optimal_plants, real_plant, plant_name)
             threading.Event().wait(30)
 
         except ValueError as ve:
@@ -23,8 +24,6 @@ def calculation_thread(database_handler, optimal_plants, calculator):
 
         
 if __name__ == "__main__":
-    optimal_plants = OptimalPlant.load_from_csv()
-
     # Create an instance of the MQTTSubscriber class
     database_handler = DatabaseHandler()
     subscriber = MQTTClient(database_handler)
@@ -36,7 +35,7 @@ if __name__ == "__main__":
     subscriber_thread.start()
 
     #Database Handler Thread
-    database_handler_thread = threading.Thread(target=calculation_thread, args=(database_handler, optimal_plants, None))
+    database_handler_thread = threading.Thread(target=calculation_thread, args=(database_handler,))
     database_handler_thread.start()
 
     try:

@@ -5,14 +5,14 @@ from .optimal_plants_list_functions import get_optimal_plants_as_list
 csv_file_path = "logic/plants_config/optimal_plants/optimal_plants.csv"
 
 class OptimalPlant:
-    def __init__(self, plant, temperature_min, temperature_max, humidity_min, humidity_max, moisture, pause_for_watering, sun_min, sun_category, notes=None):
+    def __init__(self, plant, temperature_min, temperature_max, humidity_min, humidity_max, moisture_min, moisture_max, pause_for_watering, sun_min, sun_category, notes=None):
         self.plant = plant
         self.temperature_min = int(temperature_min)
         self.temperature_max = int(temperature_max)
         self.humidity_min = int(humidity_min)
         self.humidity_max = int(humidity_max)
-        #TODO moisture sollte auch int sein
-        self.moisture = moisture
+        self.moisture_min = int(moisture_min)
+        self.moisture_max = int(moisture_max)
         self.pause_for_watering = int(pause_for_watering)
         self.sun_min = int(sun_min)
         self.sun_category = sun_category
