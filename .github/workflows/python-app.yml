@@ -39,10 +39,10 @@ jobs:
       run: |
         cd Main_Controller/logic
         openssl aes-256-cbc -K ${{ secrets.ENCRYPTION_KEY }} -iv ${{ secrets.ENCRYPTION_IV }} -in mqtt_package/mqtt_resources.yaml.enc -out mqtt_package/mqtt_resources.yaml -d
-        openssl aes-256-cbc -K ${{ secrets.ENCRYPTION_KEY }} -iv ${{ secrets.ENCRYPTION_IV }} -in influxdb_package/influx_config.yaml.enc -out influxdb_package/influx_config.yaml -d
+        openssl aes-256-cbc -K ${{ secrets.ENCRYPTION_KEY }} -iv ${{ secrets.ENCRYPTION_IV }} -in database_package/influx_config.yaml.enc -out database_package/influx_config.yaml -d
         ls -R
         cat mqtt_package/mqtt_resources.yaml
-        cat influxdb_package/influx_config.yaml
+        cat database_package/influx_config.yaml
       env:
         ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
         ENCRYPTION_IV: ${{ secrets.ENCRYPTION_IV }}
