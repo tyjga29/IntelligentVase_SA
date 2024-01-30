@@ -9,13 +9,13 @@ from logic.plants_config.plant_sensor_data.plant_sensor_data import PlantSensorD
 #TODO database of plants with the id of the arduino
 plant_name = "Succulent"
 
-def calculation_thread(database_handler):
+def calculation_thread(database_handler, response_handler):
     while True:
         try:
             optimal_plants = OptimalPlant.load_from_csv()
             real_plant = PlantSensorData.get_current_values(database_handler)
-            ResponseHandler.judge_environemnt(optimal_plants, real_plant, plant_name)
-            threading.Event().wait(30)
+            response_handler.judge_environemnt(optimal_plants, real_plant, plant_name)
+            threading.Event().wait(60)
 
         except ValueError as ve:
             print(f"Error : {ve}")
@@ -26,16 +26,18 @@ def calculation_thread(database_handler):
 if __name__ == "__main__":
     # Create an instance of the MQTTSubscriber class
     database_handler = DatabaseHandler()
-    subscriber = MQTTClient(database_handler)
+    mqtt_client = MQTTClient(database_handler)
+    response_handler = ResponseHandler(mqtt_client)
+    mqtt_client.activate_pump(5)
     
     #calculator = Calculator()
 
     #MQTT Subscriber Thread
-    subscriber_thread = threading.Thread(target=subscriber.subscribe)
+    subscriber_thread = threading.Thread(target=mqtt_client.subscribe)
     subscriber_thread.start()
 
     #Database Handler Thread
-    database_handler_thread = threading.Thread(target=calculation_thread, args=(database_handler,))
+    database_handler_thread = threading.Thread(target=calculation_thread, args=(database_handler, response_handler))
     database_handler_thread.start()
 
     try:
@@ -43,5 +45,5 @@ if __name__ == "__main__":
             # We can perform other tasks here while the client is subscribed
             pass
     except KeyboardInterrupt:
-        subscriber.stop()
+        mqtt_client.stop()
         database_handler_thread.join()

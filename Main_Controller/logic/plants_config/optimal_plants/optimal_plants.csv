@@ -1,6 +1,6 @@
 ﻿Plant;Temperature min (in C);Temperature max (in C);Humidity min (in rH%);Humidity max (in rH%);Moisture min (in %);Moisture max (in %); Pause for watering (in h);Sun min (time in h);Sun Category;Notes
 Tomato;15;32;65;85;40;50;3;6;direct;
-Succulent;4;27;40;50;40;50;120;6;shade;Grows the best if it has constant, strong light. Should lay a bit in the shade. Be careful of direct sun. Ideally they should get a lot of air circulation.
+Succulent;30;5;40;50;500;600;120;6;shade;Grows the best if it has constant, strong light. Should lay a bit in the shade. Be careful of direct sun. Ideally they should get a lot of air circulation.
 Cucumber;15;32;60;80;40;50;3;6;direct;
 Orchid;18;28;40;60;40;50;4;6;direct;
 Cactus;18;32;10;30;40;50;8;6;direct;

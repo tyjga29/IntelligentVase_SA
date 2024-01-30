@@ -40,7 +40,8 @@ class MQTTClient:
     def activate_pump(self, waterpump_activation_in_s):
         print(f"Activating pump for {waterpump_activation_in_s} seconds.")
         message = str(waterpump_activation_in_s)
-        threading.Thread(target= self.client.publish, args=(self.waterpump_activate_topic, message)).start()
+        self.client.publish(self.waterpump_activate_topic, message)
+        #threading.Thread(target=self.client.publish, args=(self.waterpump_activate_topic, message)).start()
         print("Waterpump mqtt-signal successfully sent.")
 
     def stop(self):
