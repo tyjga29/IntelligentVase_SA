@@ -7,7 +7,7 @@ InDepth:
 The script.py will start the mqtt_subscriber in the mqtt_package. The appropriate topics will be listened to and then the values will be used to send them over insert_data.py in the datahandler_package.
 
 Use of docker:
-Is something changed in the Main_Controller please delete the container in Docker Desktop. Then:
+Is something changed in the Main_Controller please run from that directory:
 docker-compose build
 docker-compose up -d
 

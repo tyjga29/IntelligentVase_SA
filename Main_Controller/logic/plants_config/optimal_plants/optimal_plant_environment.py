@@ -1,8 +1,9 @@
-import csv
+import os
 
 from .optimal_plants_list_functions import get_optimal_plants_as_list
 
-csv_file_path = "logic/plants_config/optimal_plants/optimal_plants.csv"
+dir_path = os.path.dirname(__file__)
+csv_file_path = os.path.join(dir_path, "optimal_plants.csv")
 
 class OptimalPlant:
     def __init__(self, plant, temperature_min, temperature_max, humidity_min, humidity_max, moisture_min, moisture_max, pause_for_watering, sun_min, sun_category, notes=None):

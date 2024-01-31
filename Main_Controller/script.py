@@ -1,5 +1,9 @@
 import threading
 
+from influxdb_client import Point
+import influxdb_client
+from influxdb_client.client.write_api import SYNCHRONOUS
+
 from logic.mqtt_package.mqtt_client import MQTTClient
 from logic.response_package.response_handler import ResponseHandler
 from logic.database_package.database_handler import DatabaseHandler
@@ -19,18 +23,29 @@ def calculation_thread(database_handler, response_handler):
 
         except ValueError as ve:
             print(f"Error : {ve}")
+            threading.Event().wait(60)
         except Exception as e:
             print(f"An unexpected error occured: {e}")
+            threading.Event().wait(60)
 
-        
+tag = "SensorId"
+tag_nr = "1"
+field = "Measurement"
+value = 88.0
+point = (
+            Point("temperature")
+            .tag(tag, tag_nr)
+            .field(field, value)
+        )
+write_api = influxdb_client.InfluxDBClient(url="http://localhost:8086", token="secret_token", org="my_org").write_api(write_options=SYNCHRONOUS)
+
+
 if __name__ == "__main__":
     # Create an instance of the MQTTSubscriber class
+    write_api.write(bucket="my_bucket", org="my_org", record=point)
     database_handler = DatabaseHandler()
     mqtt_client = MQTTClient(database_handler)
     response_handler = ResponseHandler(mqtt_client)
-    mqtt_client.activate_pump(5)
-    
-    #calculator = Calculator()
 
     #MQTT Subscriber Thread
     subscriber_thread = threading.Thread(target=mqtt_client.subscribe)

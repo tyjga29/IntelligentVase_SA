@@ -1,3 +1,4 @@
+import influxdb_client
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -12,7 +13,7 @@ class DatabaseHandler:
            
         self.token, self.org, self.url, self.bucket = get_influx_config()
 
-        self.influx_client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
+        self.influx_client = influxdb_client.InfluxDBClient(url=self.url, token=self.token, org=self.org)
         self.write_api = self.influx_client.write_api(write_options=SYNCHRONOUS)
         self.query_api = self.influx_client.query_api()
 
