@@ -1,6 +1,9 @@
+behave==1.2.6
 certifi==2023.11.17
 influxdb-client==1.40.0
 paho-mqtt==1.6.1
+parse==1.20.1
+parse-type==0.6.2
 python-dateutil==2.8.2
 python-dotenv==1.0.1
 PyYAML==6.0.1
