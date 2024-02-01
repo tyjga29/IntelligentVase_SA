@@ -1,7 +1,11 @@
 import unittest
 import tempfile
 import os
+from dotenv import load_dotenv
+
 from logic.mqtt_package.get_mqtt_config import load_mqtt_resources, get_mqtt_address_and_port, get_mqtt_subscriber_topics, get_table_names, get_topic_mapping, get_mqtt_waterpump_activate_topic
+
+load_dotenv()
 
 class TestGetMqttConfig(unittest.TestCase):
 
@@ -9,8 +13,6 @@ class TestGetMqttConfig(unittest.TestCase):
         # Create a temporary YAML file for testing
         self.test_yaml_content = """
         mqtt_resources:
-          BROKER_ADDRESS: "test.mosquitto.org"
-          BROKER_PORT: 1883
           SUBSCRIBER_TOPICS:
             - MQTT_TOPIC: "light_ard"
               TABLE_NAME: "light"
@@ -42,16 +44,14 @@ class TestGetMqttConfig(unittest.TestCase):
     def test_load_mqtt_resources(self):
         # Test if the function loads the YAML file correctly
         result = load_mqtt_resources()
-        self.assertEqual(result['BROKER_ADDRESS'], "test.mosquitto.org")
-        self.assertEqual(result['BROKER_PORT'], 1883)
         self.assertIn('SUBSCRIBER_TOPICS', result)
         self.assertEqual(result['WATERPUMP_ACTIVATE_TOPIC'], "waterpump_activate_ard")
 
     def test_get_mqtt_address_and_port(self):
         # Test if the function returns the correct address and port
         address, port = get_mqtt_address_and_port()
-        self.assertEqual(address, "test.mosquitto.org")
-        self.assertEqual(port, 1883)
+        self.assertEqual(address, os.environ.get("MQTT_BROKER_ADDRESS"))
+        self.assertEqual(port, int(os.environ.get("MQTT_BROKER_PORT")))
 
     def test_get_mqtt_subscriber_topics(self):
         # Test if the function returns the correct subscriber topics
