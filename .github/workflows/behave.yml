@@ -26,5 +26,5 @@ jobs:
 
     - name: Run Behave tests
       run: |
-        cd Main_Controller/features
+        cd Main_Controller
         behave
