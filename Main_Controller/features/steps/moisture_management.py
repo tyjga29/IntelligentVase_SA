@@ -1,8 +1,9 @@
 from behave import given, when, then
 
 import io
-import sys
 from contextlib import redirect_stdout
+
+from datetime import datetime
 
 from logic.plants_config.plant_sensor_data.plant_sensor_data import PlantSensorData
 from logic.database_package.database_handler import DatabaseHandler
@@ -13,8 +14,13 @@ from logic.response_package.response_functions import moisture_response
 
 @given("an intelligent vase which is ready to manage soil moisture")
 def step_given_intelligent_vase(context):
-    context.database_handler = DatabaseHandler()
-    context.plant = PlantSensorData.get_current_values(context.database_handler)
+    temperature_value = 25.0
+    light_value = 500
+    humidity_value = 60.0
+    moisture_value = 35
+    current_time_value = datetime.now()
+
+    context.plant = PlantSensorData(temperature_value, light_value, humidity_value, moisture_value, current_time_value)
 
 @given("the vase holds a {plant_type}")
 def step_given_vase_holds_plant(context, plant_type):
@@ -36,7 +42,8 @@ def step_at_certain_average_moisture(context, average_moisture_level):
 
 @then("{expected_action} should happen")
 def step_then_expected_action(context, expected_action):
-    context.mqtt_client = MQTTClient(context.database_handler)
+    database_handler = DatabaseHandler()
+    context.mqtt_client = MQTTClient(context)
 
     captured_output = io.StringIO()
     with redirect_stdout(captured_output):
