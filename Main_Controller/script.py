@@ -1,7 +1,5 @@
 import threading
 
-from influxdb_client import Point
-import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 from logic.mqtt_package.mqtt_client import MQTTClient
@@ -28,21 +26,8 @@ def calculation_thread(database_handler, response_handler):
             print(f"An unexpected error occured: {e}")
             threading.Event().wait(60)
 
-tag = "SensorId"
-tag_nr = "1"
-field = "Measurement"
-value = 88.0
-point = (
-            Point("temperature")
-            .tag(tag, tag_nr)
-            .field(field, value)
-        )
-write_api = influxdb_client.InfluxDBClient(url="http://localhost:8086", token="secret_token", org="my_org").write_api(write_options=SYNCHRONOUS)
-
-
 if __name__ == "__main__":
     # Create an instance of the MQTTSubscriber class
-    write_api.write(bucket="my_bucket", org="my_org", record=point)
     database_handler = DatabaseHandler()
     mqtt_client = MQTTClient(database_handler)
     response_handler = ResponseHandler(mqtt_client)

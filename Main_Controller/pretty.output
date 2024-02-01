@@ -1,22 +1,26 @@
-Feature: Moisture Management # logic/mqtt_package/features/moisture_management.feature:1
+Feature: Moistuere Level Management # features/moisture_management.feature:1
 
-  Scenario: Water Pump Activation          # logic/mqtt_package/features/moisture_management.feature:3
-    Given the moisture level is too low    # logic/mqtt_package/features/steps/moisture_management.py:21
-    When we activate the pump              # logic/mqtt_package/features/steps/moisture_management.py:10
-    Then the pump should run for 5 seconds # logic/mqtt_package/features/steps/moisture_management.py:17
+  Scenario Outline: Moisture level Below optimal for succulent -- @1.1                                    # features/moisture_management.feature:12
+    Given an intelligent vase which is ready to manage soil moisture                                      # features/steps/moisture_management.py:14
+    And the vase holds a Succulent                                                                        # features/steps/moisture_management.py:19
+    And we have a list of optimal environment for plants where we can search the matching plant Succulent # features/steps/moisture_management.py:23
+    And that plant requires an optimal moisture level between 8 and 12                                    # features/steps/moisture_management.py:28
+    When the plant has an average moisture level of 5                                                     # features/steps/moisture_management.py:33
+    Then Activate Pump should happen                                                                      # features/steps/moisture_management.py:37
 
-  Scenario Outline: Moisture at Perfect Level or Above -- @1.1   # logic/mqtt_package/features/moisture_management.feature:15
-    Given the moisture level is 100%                             # logic/mqtt_package/features/steps/moisture_management.py:21
-    When we check the moisture level                             # logic/mqtt_package/features/steps/moisture_management.py:30
-    Then we should not activate the pump                         # logic/mqtt_package/features/steps/moisture_management.py:35
+  Scenario Outline: Moisture level Optimal for succulent -- @1.2                                          # features/moisture_management.feature:13
+    Given an intelligent vase which is ready to manage soil moisture                                      # features/steps/moisture_management.py:14
+    And the vase holds a Succulent                                                                        # features/steps/moisture_management.py:19
+    And we have a list of optimal environment for plants where we can search the matching plant Succulent # features/steps/moisture_management.py:23
+    And that plant requires an optimal moisture level between 8 and 12                                    # features/steps/moisture_management.py:28
+    When the plant has an average moisture level of 10                                                    # features/steps/moisture_management.py:33
+    Then Do Nothing should happen                                                                         # features/steps/moisture_management.py:37
 
-  Scenario Outline: Moisture at Perfect Level or Above -- @1.2   # logic/mqtt_package/features/moisture_management.feature:16
-    Given the moisture level is 95%                              # logic/mqtt_package/features/steps/moisture_management.py:21
-    When we check the moisture level                             # logic/mqtt_package/features/steps/moisture_management.py:30
-    Then we should not activate the pump                         # logic/mqtt_package/features/steps/moisture_management.py:35
-
-  Scenario Outline: Moisture at Perfect Level or Above -- @1.3   # logic/mqtt_package/features/moisture_management.feature:17
-    Given the moisture level is 105%                             # logic/mqtt_package/features/steps/moisture_management.py:21
-    When we check the moisture level                             # logic/mqtt_package/features/steps/moisture_management.py:30
-    Then we should not activate the pump                         # logic/mqtt_package/features/steps/moisture_management.py:35
+  Scenario Outline: Moisture level Too high for succulent -- @1.3                                         # features/moisture_management.feature:14
+    Given an intelligent vase which is ready to manage soil moisture                                      # features/steps/moisture_management.py:14
+    And the vase holds a Succulent                                                                        # features/steps/moisture_management.py:19
+    And we have a list of optimal environment for plants where we can search the matching plant Succulent # features/steps/moisture_management.py:23
+    And that plant requires an optimal moisture level between 8 and 12                                    # features/steps/moisture_management.py:28
+    When the plant has an average moisture level of 15                                                    # features/steps/moisture_management.py:33
+    Then Alert User should happen                                                                         # features/steps/moisture_management.py:37
 

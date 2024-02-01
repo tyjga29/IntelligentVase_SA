@@ -1,5 +1,4 @@
 import influxdb_client
-from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 from .get_influx_config import get_table_topics, get_table_mapping, get_influx_config
@@ -22,6 +21,6 @@ class DatabaseHandler:
 
     # Retrieves the mean of all the tables of the last minute
     def retrieve_data(self):
-        tables = get_data(self)
+        tables = get_data(self.query_api, self.table_names, self.bucket, self.org)
         return tables
         

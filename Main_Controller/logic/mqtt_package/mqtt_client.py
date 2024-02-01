@@ -1,5 +1,4 @@
 import paho.mqtt.client as mqtt
-import threading
 
 from .get_mqtt_config import get_mqtt_address_and_port, get_mqtt_subscriber_topics, get_mqtt_waterpump_activate_topic
 

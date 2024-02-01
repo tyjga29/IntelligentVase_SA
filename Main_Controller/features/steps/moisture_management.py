@@ -1,29 +1,54 @@
 from behave import given, when, then
-import time
+
+import io
+import sys
+from contextlib import redirect_stdout
 
 from logic.plants_config.plant_sensor_data.plant_sensor_data import PlantSensorData
+from logic.database_package.database_handler import DatabaseHandler
+from logic.mqtt_package.mqtt_client import MQTTClient
+from logic.plants_config.optimal_plants.optimal_plant_environment import OptimalPlant
+from logic.plants_config.optimal_plants.optimal_plants_list_functions import find_optimal_plant_by_name
+from logic.response_package.response_functions import moisture_response
 
 @given("an intelligent vase which is ready to manage soil moisture")
 def step_given_intelligent_vase(context):
-    context.plant = PlantSensorData()
-    pass
+    context.database_handler = DatabaseHandler()
+    context.plant = PlantSensorData.get_current_values(context.database_handler)
 
 @given("the vase holds a {plant_type}")
 def step_given_vase_holds_plant(context, plant_type):
     context.plant_type = plant_type
 
-@given("that plant requires {optimal_level} as a moisture level")
-def step_given_plant_requires_optimal_level(context, optimal_level):
-    context.optimal_level = int(optimal_level)
+@given("we have a list of optimal environment for plants where we can search the matching plant {plant_type}")
+def step_given_plant_requires_optimal_level(context, plant_type):
+    optimal_plants = OptimalPlant.load_from_csv()
+    context.matching_plant = find_optimal_plant_by_name(optimal_plants, plant_type)
 
-@when("{average_moisture_level} is reached")
-def step_when_average_moisture_level_reached(context, average_moisture_level):
-    context.average_moisture_level = int(average_moisture_level)
+@given("that plant requires an optimal moisture level between {min_optimal_level:d} and {max_optimal_level:d}")
+def step_given_plant_requires_optimal_level(context, min_optimal_level, max_optimal_level):
+    context.matching_plant.moisture_min = min_optimal_level
+    context.matching_plant.moisture_max = max_optimal_level
 
-@then("{expected_action} should have happened in the next 5 seconds")
-def step_then_expected_action_in_next_5_seconds(context, expected_action):
-    # Your test logic here
-    time.sleep(5)  # Simulating the wait for 5 seconds
-    assert context.expected_action == expected_action  # Add your actual assertion logic
+@when("the plant has an average moisture level of {average_moisture_level}")
+def step_at_certain_average_moisture(context, average_moisture_level):
+    context.plant.moisture = float(average_moisture_level)
 
-# You may need additional steps based on your test logic
+@then("{expected_action} should happen")
+def step_then_expected_action(context, expected_action):
+    context.mqtt_client = MQTTClient(context.database_handler)
+
+    captured_output = io.StringIO()
+    with redirect_stdout(captured_output):
+        moisture_response(context.matching_plant, context.plant, context.mqtt_client)
+    print_output = captured_output.getvalue()
+
+    print(f"this is the printed output: {print_output}")
+    
+    if expected_action.lower() == "alert user":
+        assert print_output.lower(), f"Soil Moisture {context.plant.moisture} % is too high. Please put the plant inside or take it into the sun for a short time to dry."
+    elif expected_action.lower() == "activate pump":
+        assert print_output.lower(), f"Soil Moisture {context.plant.moisture} % is too low. Activating waterpump."
+    elif expected_action.lower() == "do nothing":
+        assert print_output.lower(), f"Soil Moisture adequate."
+

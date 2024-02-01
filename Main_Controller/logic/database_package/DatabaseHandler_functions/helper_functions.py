@@ -23,7 +23,7 @@ def insert_data(influx_write_api, influx_bucket, influx_org, table_mapping, tabl
     else:
         print("Unknown topic received")
 
-def get_data(self):
+def get_data(query_api, table_names, bucket, org):
     print("Trying to retrieve Data from InfluxDB")
     try:
         all_tables = []
@@ -34,15 +34,15 @@ def get_data(self):
         moisture = None
 
         # Construct and execute queries for each table
-        for table_name in self.table_names:
+        for table_name in table_names:
             print("Querying for table:", table_name)
-            query = f"""from(bucket: "{self.bucket}")
+            query = f"""from(bucket: "{bucket}")
                 |> range(start: -1m)
                 |> filter(fn: (r) => r._measurement == "{table_name}")
                 |> mean()"""
 
             # Execute query
-            tables = self.query_api.query(query, org=self.org)
+            tables = query_api.query(query, org=org)
 
             # Check if there are any records
             if tables and tables[0].records:
