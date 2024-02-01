@@ -1,9 +1,3 @@
 influxdb_config:
   org: "my_org"
   bucket: "my_bucket"
-
-#influxdb_config für docker:
-#  org: "Tyjga Enterprsie"
-#  url: "http://influxdb:8086"
-#  token: "nFmBs0HU3osG90Kt5q1qjRekrRasn3fheMpc7QaFQNF2ueIxPvGdusaf_xLfEPq-pmQuVnHLBtg6DL4V2lm3Uw=="
-#  bucket: "Intelligent_Vase"
