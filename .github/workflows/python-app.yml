@@ -17,35 +17,36 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      INFLUX_TOKEN: ${{ secrets.INFLUX_TOKEN }}
+      INFLUX_URL: ${{ secrets.INFLUX_URL }}
+      MQTT_BROKER_ADDRESS: ${{ secrets.MQTT_BROKER_ADDRESS }}
+      MQTT_BROKER_PORT: ${{ secrets.MQTT_BROKER_PORT }}
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
+        
     - name: Install dependencies
       run: |
         cd Main_Controller
         python -m pip install --upgrade pip
         pip install flake8
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Decrypt and use sensitive file
-      run: |
-        cd Main_Controller/logic
-        openssl aes-256-cbc -K ${{ secrets.ENCRYPTION_KEY }} -iv ${{ secrets.ENCRYPTION_IV }} -in mqtt_package/mqtt_resources.yaml.enc -out mqtt_package/mqtt_resources.yaml -d
-        openssl aes-256-cbc -K ${{ secrets.ENCRYPTION_KEY }} -iv ${{ secrets.ENCRYPTION_IV }} -in database_package/influx_config.yaml.enc -out database_package/influx_config.yaml -d
-        ls -R
-        cat mqtt_package/mqtt_resources.yaml
-        cat database_package/influx_config.yaml
       env:
         ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
         ENCRYPTION_IV: ${{ secrets.ENCRYPTION_IV }}
+
     - name: Test with unittest
       run: |
         cd Main_Controller

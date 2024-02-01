@@ -1,6 +1,10 @@
 import yaml
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 def load_mqtt_resources():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     yaml_path = os.path.join(dir_path, 'mqtt_resources.yaml')
@@ -11,9 +15,9 @@ def load_mqtt_resources():
     return mqtt_resources
 
 def get_mqtt_address_and_port():
-    mqtt_resources = load_mqtt_resources()
-    broker_address = mqtt_resources["BROKER_ADDRESS"]
-    broker_port = mqtt_resources["BROKER_PORT"]
+    broker_address = os.environ.get("MQTT_BROKER_ADDRESS")
+    broker_port_str = os.environ.get("MQTT_BROKER_PORT")
+    broker_port = int(broker_port_str)
 
     return broker_address, broker_port
 
