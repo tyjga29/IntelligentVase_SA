@@ -103,15 +103,17 @@ void setupMQTTReceiver() {
 
 void readAndSendMeasurements() {
   int light_value = analogRead(LightAnalog_Input);
-  int moisture_value = analogRead(MoistureAnalog_Input);
   float temperature_value = dht.readTemperature();
   float humidity_value = dht.readHumidity();
+  float moisture_value = analogRead(MoistureAnalog_Input);
+
+  moisture_value = calculateMoisture(moisture_value);
 
   Serial.print("Light Value: ");
   Serial.println(light_value);
   sendDataOverMQTT(light_value, light_topic);
 
-  Serial.print("Moisture Value: ");
+  Serial.print("Moisture Value: (in %): ");
   Serial.println(moisture_value);
   sendDataOverMQTT(moisture_value, moisture_topic);
 
@@ -122,6 +124,15 @@ void readAndSendMeasurements() {
   Serial.print("Humidity Value(in %rH): ");
   Serial.println(humidity_value);
   sendDataOverMQTT(humidity_value, humidity_topic);
+}
+
+//Max-Wert: 795
+//Min-Wert: 370
+float calculateMoisture(float moisture_value) {
+  float moisture_percent = moisture_value - 370;
+  moisture_percent = moisture_percent / 425 * 100;
+  moisture_percent = 100 - moisture_percent;
+  return moisture_percent;
 }
 
 void sendDataOverMQTT(int data, const char* topic) {
