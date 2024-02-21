@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import paho.mqtt.client as mqtt
 
 from .get_mqtt_config import get_mqtt_address_and_port, get_mqtt_subscriber_topics, get_mqtt_waterpump_activate_topic
@@ -5,6 +8,7 @@ from .get_mqtt_config import get_mqtt_address_and_port, get_mqtt_subscriber_topi
 class MQTTClient:
     def __init__(self, db_handler):
         self.broker_address, self.broker_port = get_mqtt_address_and_port()
+        logging.debug(f"Initializing client with broker_address={self.broker_address} on broker_port={self.broker_port}")
         self.client = mqtt.Client()
         self.events = []
         self.db_handler = db_handler
@@ -17,31 +21,32 @@ class MQTTClient:
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
-            print("Connected to MQTT broker")
+            logging.info("Connected to MQTT broker")
             for topic in self.subscriber_topics:
                 client.subscribe(topic)
+                logging.debug("Subscribed to topic: %s", topic)
         else:
-            print("Connection failed with code", rc)
+            logging.error("Connection failed with code %s", rc)
 
     def on_message(self, client, userdata, message):
         payload = message.payload.decode("utf-8")
-        print(f"Received message on topic '{message.topic}': {payload}")
+        logging.info("Received message on topic '%s': %s", message.topic, payload)
 
         if self.db_handler:
             self.db_handler.write_data(message.topic, payload)
         else:
-            print("InfluxDB is missing")
+            logging.warning("InfluxDB is missing")
 
     def subscribe(self):
         self.client.connect(self.broker_address, self.broker_port)
         self.client.loop_start()
+        logging.debug("MQTT Client subscribed and loop started")
 
     def activate_pump(self, waterpump_activation_in_s):
-        print(f"Activating pump for {waterpump_activation_in_s} seconds.")
+        logging.info("Activating pump for %s seconds.", waterpump_activation_in_s)
         message = str(waterpump_activation_in_s)
         self.client.publish(self.waterpump_activate_topic, message)
-        #threading.Thread(target=self.client.publish, args=(self.waterpump_activate_topic, message)).start()
-        print("Waterpump mqtt-signal successfully sent.")
+        logging.debug(f"Waterpump mqtt-signal successfully sent to topic={self.waterpump_activate_topic}")
 
     def stop(self):
         self.client.disconnect()

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 
 class PlantSensorData:
@@ -24,8 +27,8 @@ class PlantSensorData:
                             if record is not None:
                                 measurement = record.get_measurement()
                                 field_value = record.get_value()
-                                print(f"Measurement: {measurement}")
-                                print(f"Field Value: {field_value}")
+                                logging.debug(f"Measurement: {measurement}")
+                                logging.debug(f"Field Value: {field_value}")
 
                                 if measurement == 'temperature':
                                     temperature = field_value
@@ -39,10 +42,12 @@ class PlantSensorData:
                 current_time = datetime.now()
                 # Create an instance of PlantSensorData
                 data = cls(temperature, light, humidity, moisture, current_time)
-                print(f"Plant environment: Time: {data.current_time}, Temperature: {data.temperature}, Light: {data.light}, Humidity: {data.humidity}, Moisture: {data.moisture}")
+                logging.info(f"Plant environment: Time: {data.current_time}, Temperature: {data.temperature}, Light: {data.light}, Humidity: {data.humidity}, Moisture: {data.moisture}")
                 return data
             else:
-                print("Tables are empty")
+                logging.warning("Tables are empty")
+                return None
 
         except Exception as e:
-            print(f"An unexpected error occurred: {str(e)}")
+            logging.error(f"An unexpected error occurred: {str(e)}")
+            return None

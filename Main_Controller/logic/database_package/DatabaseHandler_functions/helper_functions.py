@@ -1,6 +1,10 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from influxdb_client import Point
 
 def insert_data(influx_write_api, influx_bucket, influx_org, table_mapping, table_topic, value):
+    logging.info("Writing data into InfluxDB")
     measurement_name = None
     for topic_info in table_mapping:
         if table_topic == topic_info["MQTT_TOPIC"]:
@@ -19,12 +23,12 @@ def insert_data(influx_write_api, influx_bucket, influx_org, table_mapping, tabl
             .field(field, value)
         )
         influx_write_api.write(bucket=influx_bucket, org=influx_org, record=point)
-        print(f"Sent value {value} to datapoint: {measurement_name} on tag {tag} with the number {tag_nr} and the field {field}")
+        logging.debug(f"Sent value {value} to datapoint: {measurement_name} on tag {tag} with the number {tag_nr} and the field {field}")
     else:
-        print("Unknown topic received")
+        logging.warning("Unknown topic received")
 
 def get_data(query_api, table_names, bucket, org):
-    print("Trying to retrieve Data from InfluxDB")
+    logging.info("Retrieving Data from InfluxDB")
     try:
         all_tables = []
 
@@ -35,7 +39,7 @@ def get_data(query_api, table_names, bucket, org):
 
         # Construct and execute queries for each table
         for table_name in table_names:
-            print("Querying for table:", table_name)
+            logging.debug("Querying for table: %s", table_name)
             query = f"""from(bucket: "{bucket}")
                 |> range(start: -1m)
                 |> filter(fn: (r) => r._measurement == "{table_name}")
@@ -46,19 +50,18 @@ def get_data(query_api, table_names, bucket, org):
 
             # Check if there are any records
             if tables and tables[0].records:
-                # Print the results
                 for table in tables:
                     all_tables.append(table)
                     if table.records:
                         for record in table.records:
-                            print("Record:", record)
+                            logging.debug("Record: %s", record)
                     else:
-                        print(f"No records found in table {table_name}")
+                        logging.warning(f"No records found in table {table_name}")
                 
             else:
-                print(f"No entries found in table {table_name}")
+                logging.warning(f"No entries found in table {table_name}")
                 
         return all_tables
 
     except Exception as e:
-        print(f"An unexpected error occurred: {str(e)}")
+        logging.error(f"An unexpected error occurred: %s", str(e))

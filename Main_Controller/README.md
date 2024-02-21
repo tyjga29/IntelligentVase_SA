@@ -4,7 +4,7 @@ Controller zwischen Arduino und Datenbank
 This Controller receives information from an Arduino Uno WiFi R4 over MQTT, which will compare the data to database of several plants for controlling the environment of a pot
 
 InDepth:
-    The app.py will start the mqtt_subscriber in the mqtt_package. The appropriate topics will be listened to and then the values will be used to send them over insert_data.py in the datahandler_package.
+    Upcoming Description
 
 We use a .env file for secrets
 
@@ -16,7 +16,6 @@ Update Docker image and push to Hub:
     docker tag tyjga/intelligent_vase:latest tyjga/intelligent_vase:v0.5.1
     docker push tyjga/intelligent_vase:v0.5.1
 
-
 InfluxDB:
     To log into InfluxDB use:
         user: root
@@ -27,6 +26,7 @@ Virtual environment:
     To save changes: pip freeze > requirements.txt
 
 Unittests:
+    A local InfluxDB Server must be running.
     To run all unittests execute in the Main_Controller:
         python -m unittest
     To run unittests run the specific test from the Main_Controller with this command:

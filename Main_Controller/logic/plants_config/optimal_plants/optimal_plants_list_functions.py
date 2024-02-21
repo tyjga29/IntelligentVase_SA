@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import csv
 
 def get_optimal_plants_as_list(csv_file_path):
@@ -10,9 +13,9 @@ def get_optimal_plants_as_list(csv_file_path):
     return plants_data
 
 def find_optimal_plant_by_name(optimal_plants, plant_name):
-    print(f"Searching for plant '{plant_name}'.")
+    logging.debug(f"Searching for plant '{plant_name}'.")
     for plant in optimal_plants:
         if plant.plant.lower() == plant_name.lower():
             return plant
-    print("No plant with the name has been found.")
+    logging.warning("No plant with the name has been found.")
     return None  # Return None if the plant is not found

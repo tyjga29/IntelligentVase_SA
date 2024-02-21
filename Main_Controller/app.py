@@ -1,4 +1,5 @@
 import threading
+import logging
 
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -8,7 +9,19 @@ from logic.database_package.database_handler import DatabaseHandler
 from logic.plants_config.optimal_plants.optimal_plant_environment import OptimalPlant
 from logic.plants_config.plant_sensor_data.plant_sensor_data import PlantSensorData
 
-#TODO database of plants with the id of the arduino
+# Logging Configuration
+logging_level=logging.DEBUG
+main_logger = logging.getLogger()
+main_logger.setLevel(logging_level)
+
+# Setup Stream Handler
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging_level)
+formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+stream_handler.setFormatter(formatter)
+main_logger.addHandler(stream_handler)
+
+# TODO database of plants with the id of the arduino
 plant_name = "Succulent"
 
 def calculation_thread(database_handler, response_handler):
@@ -20,10 +33,10 @@ def calculation_thread(database_handler, response_handler):
             threading.Event().wait(60)
 
         except ValueError as ve:
-            print(f"Error : {ve}")
+            logging.error(f"Error : {ve}")
             threading.Event().wait(60)
         except Exception as e:
-            print(f"An unexpected error occured: {e}")
+            logging.error(f"An unexpected error occured: {e}")
             threading.Event().wait(60)
 
 if __name__ == "__main__":
