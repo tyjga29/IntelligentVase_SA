@@ -41,7 +41,7 @@ def get_data(query_api, table_names, bucket, org):
         for table_name in table_names:
             logging.debug("Querying for table: %s", table_name)
             query = f"""from(bucket: "{bucket}")
-                |> range(start: -1m)
+                |> range(start: -5m)
                 |> filter(fn: (r) => r._measurement == "{table_name}")
                 |> mean()"""
 
