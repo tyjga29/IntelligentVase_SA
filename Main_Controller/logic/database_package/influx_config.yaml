@@ -1,0 +1,3 @@
+influxdb_config:
+  org: "my_org"
+  bucket: "my_bucket"

@@ -1,0 +1,14 @@
+mqtt_resources:
+  SUBSCRIBER_TOPICS:
+    - MQTT_TOPIC: "light_ard"
+      TABLE_NAME: "light"
+    - MQTT_TOPIC: "moisture_ard"
+      TABLE_NAME: "moisture"
+    - MQTT_TOPIC: "humidity_ard"
+      TABLE_NAME: "humidity"
+    - MQTT_TOPIC: "temperature_ard"
+      TABLE_NAME: "temperature"
+    - MQTT_TOPIC: "waterpump_error_ard"
+      TABLE_NAME: "waterpump_error"
+  WATERPUMP_ACTIVATE_TOPIC: "waterpump_activate_ard"
+

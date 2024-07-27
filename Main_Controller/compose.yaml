@@ -18,11 +18,11 @@ services:
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=root
-      - DOCKER_INFLUXDB_INIT_PASSWORD=secret_password
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${DOCKER_INFLUXDB_INIT_PASSWORD}
       - DOCKER_INFLUXDB_INIT_ORG=my_org
       - DOCKER_INFLUXDB_INIT_BUCKET=my_bucket
       - DOCKER_INFLUXDB_INIT_RETENTION=1w
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=secret_token
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
       interval: 10s
@@ -39,6 +39,11 @@ services:
     depends_on:
       influxdb:
         condition: service_healthy
+    environment:
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - INFLUX_URL=${INFLUX_URL_DOCKER}
+      - MQTT_BROKER_ADDRESS=${MQTT_BROKER_ADDRESS}
+      - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 10s

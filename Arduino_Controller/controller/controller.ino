@@ -20,7 +20,7 @@ const char* humidity_topic = HUMIDITY_DATA_TOPIC;
 const char* waterpump_activate_topic = WATERPUMP_ACTIVATE_TOPIC;
 const char* waterpump_error_topic = WATERPUMP_ERROR_TOPIC;
 
-//How often Sensor Data is send
+//How often Sensor Data is sent
 const long interval = INTERVAL_SEND;
 
 //Arduino Board Configuration
@@ -103,15 +103,17 @@ void setupMQTTReceiver() {
 
 void readAndSendMeasurements() {
   int light_value = analogRead(LightAnalog_Input);
-  int moisture_value = analogRead(MoistureAnalog_Input);
   float temperature_value = dht.readTemperature();
   float humidity_value = dht.readHumidity();
+  float moisture_value = analogRead(MoistureAnalog_Input);
+
+  moisture_value = calculateMoisture(moisture_value);
 
   Serial.print("Light Value: ");
   Serial.println(light_value);
   sendDataOverMQTT(light_value, light_topic);
 
-  Serial.print("Moisture Value: ");
+  Serial.print("Moisture Value: (in %): ");
   Serial.println(moisture_value);
   sendDataOverMQTT(moisture_value, moisture_topic);
 
@@ -122,6 +124,15 @@ void readAndSendMeasurements() {
   Serial.print("Humidity Value(in %rH): ");
   Serial.println(humidity_value);
   sendDataOverMQTT(humidity_value, humidity_topic);
+}
+
+//Max-Wert: 795
+//Min-Wert: 370
+float calculateMoisture(float moisture_value) {
+  float moisture_percent = moisture_value - 370;
+  moisture_percent = moisture_percent / 425 * 100;
+  moisture_percent = 100 - moisture_percent;
+  return moisture_percent;
 }
 
 void sendDataOverMQTT(int data, const char* topic) {
@@ -164,16 +175,19 @@ void onMqttMessage(int messageSize) {
 
   if (strcmp(received_topic, waterpump_activate_topic) == 0) {
     Serial.println("Activating Waterpump.");
-    activate_pump_to_moisture_level(received_value);
+    activate_pump(&received_value);
   }
 }
 
-void activate_pump_to_moisture_level(int waterpump_activation) {
+void activate_pump(int* waterpump_activation_time) {
+  if (*waterpump_activation_time > 10) {
+    *waterpump_activation_time = 10;
+  }
   Serial.print("Waterpump pumping for ");
-  Serial.print(waterpump_activation);
+  Serial.print(*waterpump_activation_time);
   Serial.println(" seconds.");
   digitalWrite(WaterpumpDigital_Output, HIGH);
-  delay(5000);  //5 Seconds
+  delay(*waterpump_activation_time * 1000);
   digitalWrite(WaterpumpDigital_Output, LOW);
 }
 

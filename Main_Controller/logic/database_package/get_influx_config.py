@@ -1,7 +1,10 @@
 import yaml
 import os
+from dotenv import load_dotenv
 
 from ..mqtt_package.get_mqtt_config import get_table_names, get_topic_mapping
+
+load_dotenv()
 
 def get_influx_config():
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -10,9 +13,9 @@ def get_influx_config():
         data = yaml.safe_load(f)
         influxdb_config = data["influxdb_config"]
 
-    token = influxdb_config["token"]
+    token = os.environ.get("INFLUX_TOKEN")
     org = influxdb_config["org"]
-    url = influxdb_config["url"]
+    url = os.environ.get("INFLUX_URL")
     bucket = influxdb_config["bucket"]
 
     return token, org, url, bucket

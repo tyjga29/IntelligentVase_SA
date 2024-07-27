@@ -1,5 +1,0 @@
-influxdb_config:
-  org: "ORGANIZATION"
-  url: "INFLUX_PORT"
-  token: "TOKEN"
-  bucket: "BUCKET"

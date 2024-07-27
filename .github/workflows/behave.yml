@@ -7,7 +7,14 @@ on:
 
 jobs:
   test:
+    
     runs-on: ubuntu-latest
+
+    env:
+      INFLUX_TOKEN: ${{ secrets.INFLUX_TOKEN }}
+      INFLUX_URL: ${{ secrets.INFLUX_URL }}
+      MQTT_BROKER_ADDRESS: ${{ secrets.MQTT_BROKER_ADDRESS }}
+      MQTT_BROKER_PORT: ${{ secrets.MQTT_BROKER_PORT }}
 
     steps:
     - name: Checkout repository
@@ -26,5 +33,5 @@ jobs:
 
     - name: Run Behave tests
       run: |
-        cd Main_Controller/features
+        cd Main_Controller
         behave
