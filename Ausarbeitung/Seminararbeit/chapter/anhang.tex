@@ -1,0 +1,580 @@
+%!TEX root = ../bachelor-thesis.tex
+
+\section*{Anhang}
+\addcontentsline{toc}{section}{Anhang}
+
+Im Folgenden wird der Code des Projektes präsentiert.
+Zusätzlich ist ein Video angehängt, wie die Pflanze gegossen wird, und wie mit Alexa interagiert wird.
+
+\begin{longlisting}
+\begin{minted}[tabsize=2,breaklines, breakanywhere]{c}
+#include <ArduinoMqttClient.h>
+#include <WiFiS3.h>
+#include "DHT.h"
+
+#include "arduino_secrets/arduino_secrets.h"
+
+//WiFi Variables
+const char ssid[] = SECRET_SSID;   
+const char pass[] = SECRET_PASS;   
+
+//MQTT Variables
+const char* mqtt_broker = MQTT_BROKER;
+const int mqtt_port = MQTT_PORT;
+
+//MQTT Topics
+const char* light_topic = LIGHT_DATA_TOPIC;
+const char* moisture_topic = MOISTURE_DATA_TOPIC;
+const char* temperature_topic = TEMPERATURE_DATA_TOPIC;
+const char* humidity_topic = HUMIDITY_DATA_TOPIC;
+const char* waterpump_activate_topic = WATERPUMP_ACTIVATE_TOPIC;
+const char* waterpump_error_topic = WATERPUMP_ERROR_TOPIC;
+
+//How often Sensor Data is sent
+const long interval = INTERVAL_SEND;
+
+//Arduino Board Configuration
+const int LightDigital_Input = LIGHT_DIGITAL_INPUT;
+const int LightAnalog_Input = LIGHT_ANALOG_INPUT;
+const int WaterpumpDigital_Output = WATERPUMP_DIGITAL_OUTPUT;
+const int MoistureAnalog_Input = MOISTURE_ANALOG_INPUT;
+const int DHTPIN = TEMPERATURE_HUMIDITY_DIGITAL_INPUT;
+
+//Temperature and Humidity Sensor
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
+
+//Restart Timer
+const unsigned long validation_interval = VALIDATION_INTERVAL;
+unsigned long start_time;
+
+//WiFi and MQTT Client
+WiFiClient wifiClient;
+MqttClient mqttClient(wifiClient);
+
+void setup() {
+  //Initialize serial and wait for port to open:
+  Serial.begin(9600);
+
+  while (!Serial)
+    delay(10);
+
+  setupWifi();
+  setupMQTT();
+  //setup MQTT Message receiver
+  setupMQTTReceiver();
+
+  setupSensors();
+  start_time = millis();
+}
+
+void loop() {
+  mqttClient.poll();
+  readAndSendMeasurements();
+  Serial.println();
+
+  Serial.print("Time left to validate: ");
+  Serial.print(validation_interval - (millis() - start_time));
+  Serial.println(" ms.");
+  if(millis() - start_time >= validation_interval) {
+    validateConnection();
+  }
+  delay(interval);
+}
+
+void setupSensors() {
+  pinMode(LightDigital_Input, INPUT);
+  pinMode(LightAnalog_Input, INPUT);
+  pinMode(WaterpumpDigital_Output, OUTPUT);
+  pinMode(MoistureAnalog_Input, INPUT);
+  dht.begin();
+}
+
+void setupWifi() {
+  while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
+    // failed, retry
+    Serial.print("Connection to WPA SSID ");
+    Serial.print(ssid);
+    Serial.println(" failed. Retrying...");
+    delay(2000);
+  }
+  Serial.println("You're connected to the network");
+  Serial.println();  
+}
+
+void setupMQTT() {
+  Serial.print("Attempting to connect to the MQTT broker: ");
+  Serial.println(mqtt_broker);
+
+  while (!mqttClient.connect(mqtt_broker, mqtt_port)) {
+    // MQTT connection failed, retry
+    Serial.print("MQTT connection failed! Error code = ");
+    Serial.print(mqttClient.connectError());
+    Serial.println(". Retrying...");
+    delay(2000);
+  }
+
+  Serial.println("You're connected to the MQTT broker!");
+  Serial.println();
+}
+
+void setupMQTTReceiver() {
+  mqttClient.onMessage(onMqttMessage);
+  Serial.print("Subscribing to topic: ");
+  Serial.println(waterpump_activate_topic);
+  mqttClient.subscribe(waterpump_activate_topic);
+}
+
+void readAndSendMeasurements() {
+  int light_value = analogRead(LightAnalog_Input);
+  float temperature_value = dht.readTemperature();
+  float humidity_value = dht.readHumidity();
+  float moisture_value = analogRead(MoistureAnalog_Input);
+
+  moisture_value = calculateMoisture(moisture_value);
+
+  Serial.print("Light Value: ");
+  Serial.println(light_value);
+  sendDataOverMQTT(light_value, light_topic);
+
+  Serial.print("Moisture Value: (in %): ");
+  Serial.println(moisture_value);
+  sendDataOverMQTT(moisture_value, moisture_topic);
+
+  Serial.print("Temperature Value(in °C): ");
+  Serial.println(temperature_value);
+  sendDataOverMQTT(temperature_value, temperature_topic);
+
+  Serial.print("Humidity Value(in %rH): ");
+  Serial.println(humidity_value);
+  sendDataOverMQTT(humidity_value, humidity_topic);
+}
+
+//Max-Wert: 795
+//Min-Wert: 370
+float calculateMoisture(float moisture_value) {
+  float moisture_percent = moisture_value - 370;
+  moisture_percent = moisture_percent / 425 * 100;
+  moisture_percent = 100 - moisture_percent;
+  return moisture_percent;
+}
+
+void sendDataOverMQTT(int data, const char* topic) {
+  Serial.print("Sending data to topic: ");
+  Serial.println(topic);
+
+  //send message, the Print interface can be used to set the message contents
+  mqttClient.beginMessage(topic);
+  mqttClient.print(data);
+  mqttClient.endMessage();
+}
+
+void onMqttMessage(int messageSize) {
+  Serial.println();
+  Serial.print("Received a message with topic ");
+  Serial.println(mqttClient.messageTopic());
+  const char* received_topic = mqttClient.messageTopic().c_str();
+
+  // Allocate a buffer to hold the incoming message
+  char messageBuffer[messageSize + 1];  // +1 for null terminator
+  memset(messageBuffer, 0, sizeof(messageBuffer));  // Clear the buffer
+
+  // Read the message into the buffer
+  int bytesRead = 0;
+  while (mqttClient.available() && bytesRead < messageSize) {
+    char c = mqttClient.read();
+    messageBuffer[bytesRead] = c;
+    bytesRead++;
+  }
+
+  // Null-terminate the buffer
+  messageBuffer[bytesRead] = '\0';
+  
+  // Convert the message buffer to an integer
+  int received_value = atoi(messageBuffer);
+
+  // Now 'receivedValue' contains the integer value from the MQTT message
+  Serial.print("Received value: ");
+  Serial.println(received_value);
+
+  if (strcmp(received_topic, waterpump_activate_topic) == 0) {
+    Serial.println("Activating Waterpump.");
+    activate_pump(&received_value);
+  }
+}
+
+void activate_pump(int* waterpump_activation_time) {
+  if (*waterpump_activation_time > 10) {
+    *waterpump_activation_time = 10;
+  }
+  Serial.print("Waterpump pumping for ");
+  Serial.print(*waterpump_activation_time);
+  Serial.println(" seconds.");
+  digitalWrite(WaterpumpDigital_Output, HIGH);
+  delay(*waterpump_activation_time * 1000);
+  digitalWrite(WaterpumpDigital_Output, LOW);
+}
+
+void validateConnection() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Connection to WiFi lost. Reconnecting...");
+    setupWifi();
+  }
+  if (!mqttClient.connected()) {
+    Serial.println("MQTT Client disonnected. Reconnecting...");
+    setupMQTT();
+    setupMQTTReceiver();
+  }
+  start_time = millis();
+}
+\end{minted}
+\caption{Arduino Controller, C}\label{cde:applicationService}
+\end{longlisting}
+\newpage
+
+\begin{longlisting}
+\begin{minted}[tabsize=2,breaklines, breakanywhere]{python}
+import threading
+import logging
+from flask import Flask, jsonify
+from influxdb_client.client.write_api import SYNCHRONOUS
+from logic.mqtt_package.mqtt_client import MQTTClient
+from logic.response_package.response_handler import ResponseHandler
+from logic.database_package.database_handler import DatabaseHandler
+from logic.plants_config.optimal_plants.optimal_plant_environment import OptimalPlant
+from logic.plants_config.plant_sensor_data.plant_sensor_data import PlantSensorData
+
+# Logging Configuration
+logging_level=logging.DEBUG
+main_logger = logging.getLogger()
+main_logger.setLevel(logging_level)
+
+# Setup Stream Handler
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging_level)
+formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+stream_handler.setFormatter(formatter)
+main_logger.addHandler(stream_handler)
+
+# Flask app initialization
+app = Flask(__name__)
+
+# TODO database of plants with the id of the arduino
+plant_name = "Succulent"
+
+def calculation_thread(database_handler, response_handler):
+    while True:
+        try:
+            optimal_plants = OptimalPlant.load_from_csv()
+            real_plant = PlantSensorData.get_current_values(database_handler)
+            response_handler.judge_environemnt(optimal_plants, real_plant, plant_name)
+            threading.Event().wait(60)
+
+        except ValueError as ve:
+            logging.error(f"Error : {ve}")
+            threading.Event().wait(60)
+        except Exception as e:
+            logging.error(f"An unexpected error occured: {e}")
+            threading.Event().wait(360)
+
+@app.route('/plant_info', methods=['GET'])
+def get_plant_info():
+    database_handler = DatabaseHandler()
+    real_plant = PlantSensorData.get_current_values(database_handler)
+    
+    temperature = str(real_plant.temperature)
+    soil_moisture = str(real_plant.humidity)
+    humidity = str(real_plant.light)
+    sunlight = str(real_plant.moisture)
+    
+    plant_info = {
+        "temperature": f"{temperature} degree Celsius",
+        "soil_moisture": f"{soil_moisture} percent",
+        "humidity": f"{humidity} percent",
+        "sunlight": f"{sunlight} lumen"
+    }
+    
+    return jsonify(plant_info)
+
+if __name__ == "__main__":
+    # Create an instance of the MQTTSubscriber class
+    database_handler = DatabaseHandler()
+    mqtt_client = MQTTClient(database_handler)
+    response_handler = ResponseHandler(mqtt_client)
+
+    # MQTT Subscriber Thread
+    subscriber_thread = threading.Thread(target=mqtt_client.subscribe)
+    subscriber_thread.start()
+
+    # Database Handler Thread
+    database_handler_thread = threading.Thread(target=calculation_thread, args=(database_handler, response_handler))
+    database_handler_thread.start()
+
+    # Flask App Thread
+    flask_thread = threading.Thread(target=lambda: app.run(host='0.0.0.0', port=5000))
+    flask_thread.start()
+
+    try:
+        while True:
+            # We can perform other tasks here while the client is subscribed
+            pass
+    except KeyboardInterrupt:
+        mqtt_client.stop()
+        database_handler_thread.join()
+        flask_thread.join()
+
+\end{minted}
+\caption{Haupt Controller, Python}\label{cde:applicationService}
+\end{longlisting}
+\newpage
+
+\begin{longlisting}
+\begin{minted}[tabsize=2,breaklines, breakanywhere]{python}
+from datetime import datetime
+
+class PlantSensorData:
+    def __init__(self, temperature, light, humidity, moisture, current_time):
+        self.temperature = temperature
+        self.humidity = humidity
+        self.light= light
+        self.moisture = moisture
+        self.current_time = current_time
+
+    @classmethod
+    def get_current_values(cls, database_handler):
+        try:
+            tables = database_handler.retrieve_data()
+            if tables is not None:
+                temperature = None
+                light = None
+                humidity = None
+                moisture = None
+                # Parse the data from tables
+                for table in tables:
+                    if table is not None:
+                        for record in table.records:
+                            if record is not None:
+                                measurement = record.get_measurement()
+                                field_value = record.get_value()
+                                logging.debug(f"Measurement: {measurement}")
+                                logging.debug(f"Field Value: {field_value}")
+
+                                if measurement == 'temperature':
+                                    temperature = field_value
+                                elif measurement == 'light':
+                                    light = field_value
+                                elif measurement == 'humidity':
+                                    humidity = field_value
+                                elif measurement == 'moisture':
+                                    moisture = field_value
+
+                current_time = datetime.now()
+                # Create an instance of PlantSensorData
+                data = cls(temperature, light, humidity, moisture, current_time)
+                logging.info(f"Plant environment: Time: {data.current_time}, Temperature: {data.temperature}, Light: {data.light}, Humidity: {data.humidity}, Moisture: {data.moisture}")
+                return data
+            else:
+                logging.warning("Tables are empty")
+                return None
+
+        except Exception as e:
+            logging.error(f"An unexpected error occurred: {str(e)}")
+            return None
+\end{minted}
+\caption{Plant Sensor Data, Python}\label{cde:applicationService}
+\end{longlisting}
+\newpage
+
+\begin{longlisting}
+\begin{minted}[tabsize=2,breaklines, breakanywhere]{python}
+import os
+
+from .optimal_plants_list_functions import get_optimal_plants_as_list
+
+dir_path = os.path.dirname(__file__)
+csv_file_path = os.path.join(dir_path, "optimal_plants.csv")
+
+class OptimalPlant:
+    def __init__(self, plant, temperature_min, temperature_max, humidity_min, humidity_max, moisture_min, moisture_max, pause_for_watering, sun_min, sun_category, notes=None):
+        self.plant = plant
+        self.temperature_min = int(temperature_min)
+        self.temperature_max = int(temperature_max)
+        self.humidity_min = int(humidity_min)
+        self.humidity_max = int(humidity_max)
+        self.moisture_min = int(moisture_min)
+        self.moisture_max = int(moisture_max)
+        self.pause_for_watering = int(pause_for_watering)
+        self.sun_min = int(sun_min)
+        self.sun_category = sun_category
+        self.notes = notes
+
+    @classmethod
+    def from_csv_row(cls, csv_row):
+        return cls(*csv_row)
+    
+    @classmethod
+    def load_from_csv(cls, file_path=csv_file_path):
+        plants_data = get_optimal_plants_as_list(file_path)
+        plants = [cls.from_csv_row(row) for row in plants_data]
+        return plants
+\end{minted}
+\caption{Optimal Plants, Python}\label{cde:applicationService}
+\end{longlisting}
+\newpage
+
+
+\begin{longlisting}
+\begin{minted}[tabsize=2,breaklines, breakanywhere]{python}
+class ResponseHandler:
+    def __init__(self, mqtt_client):
+        self.mqtt_client = mqtt_client
+    def judge_environemnt(self, optimal_plants, real_plant, plant_name):
+        matching_plant = find_optimal_plant_by_name(optimal_plants, plant_name)
+
+        logging.info("Comparing sensor data with optimal values")
+        moisture_response(matching_plant, real_plant, self.mqtt_client)
+\end{minted}
+\caption{Response Handler für Bodenfeuchtigkeit, Python}\label{cde:applicationService}
+\end{longlisting}
+\newpage
+
+
+\begin{longlisting}
+\begin{minted}[tabsize=2,breaklines, breakanywhere]{python}
+activation_time_pump = 3
+
+def moisture_response(matching_plant, real_plant, mqtt_client):
+    actual_moisture = real_plant.moisture
+    moisture_min = matching_plant.moisture_min
+    moisture_max = matching_plant.moisture_max
+
+    if actual_moisture > moisture_max:
+        logging.info(f"Soil Moisture {actual_moisture} % is higher than recommended value={moisture_max}. Please put the plant inside or take it into the sun for a short time to dry.")
+    elif actual_moisture < moisture_min:
+        logging.info(f"Soil Moisture {actual_moisture} % is lower than recommended value={moisture_min}. Activating waterpump.")
+        mqtt_client.activate_pump(activation_time_pump)
+    else:
+        logging.info("Soil Moisture adequate.")
+\end{minted}
+\caption{Vergleich der optimalen und reelen Werte der Bodenfeuchtigkeit}\label{cde:applicationService}
+\end{longlisting}
+\newpage
+
+\begin{longlisting}
+\begin{minted}[tabsize=2,breaklines, breakanywhere]{go}
+version: "3"
+services:
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb:/var/lib/influxdb
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=root
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${DOCKER_INFLUXDB_INIT_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=my_org
+      - DOCKER_INFLUXDB_INIT_BUCKET=my_bucket
+      - DOCKER_INFLUXDB_INIT_RETENTION=1w
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    image: tyjga/intelligent_vase:v0.5.4
+    ports:
+      - 8000:8000
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    environment:
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - INFLUX_URL=${INFLUX_URL_DOCKER}
+      - MQTT_BROKER_ADDRESS=${MQTT_BROKER_ADDRESS}
+      - MQTT_BROKER_PORT=${MQTT_BROKER_PORT}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  influxdb: null
+
+\end{minted}
+\caption{Docker Compose, Go}\label{cde:applicationService}
+\end{longlisting}
+\newpage
+
+\begin{longlisting}
+\begin{minted}[tabsize=2,breaklines, breakanywhere]{python}
+from behave import given, when, then
+
+import io
+from contextlib import redirect_stdout
+
+from datetime import datetime
+
+from logic.plants_config.plant_sensor_data.plant_sensor_data import PlantSensorData
+from logic.database_package.database_handler import DatabaseHandler
+from logic.mqtt_package.mqtt_client import MQTTClient
+from logic.plants_config.optimal_plants.optimal_plant_environment import OptimalPlant
+from logic.plants_config.optimal_plants.optimal_plants_list_functions import find_optimal_plant_by_name
+from logic.response_package.response_functions import moisture_response
+
+@given("an intelligent vase which is ready to manage soil moisture")
+def step_given_intelligent_vase(context):
+    temperature_value = 25.0
+    light_value = 500
+    humidity_value = 60.0
+    moisture_value = 35
+    current_time_value = datetime.now()
+
+    context.plant = PlantSensorData(temperature_value, light_value, humidity_value, moisture_value, current_time_value)
+
+@given("the vase holds a {plant_type}")
+def step_given_vase_holds_plant(context, plant_type):
+    context.plant_type = plant_type
+
+@given("we have a list of optimal environment for plants where we can search the matching plant {plant_type}")
+def step_given_plant_requires_optimal_level(context, plant_type):
+    optimal_plants = OptimalPlant.load_from_csv()
+    context.matching_plant = find_optimal_plant_by_name(optimal_plants, plant_type)
+
+@given("that plant requires an optimal moisture level between {min_optimal_level:d} and {max_optimal_level:d}")
+def step_given_plant_requires_optimal_level(context, min_optimal_level, max_optimal_level):
+    context.matching_plant.moisture_min = min_optimal_level
+    context.matching_plant.moisture_max = max_optimal_level
+
+@when("the plant has an average moisture level of {average_moisture_level}")
+def step_at_certain_average_moisture(context, average_moisture_level):
+    context.plant.moisture = float(average_moisture_level)
+
+@then("{expected_action} should happen")
+def step_then_expected_action(context, expected_action):
+    database_handler = DatabaseHandler()
+    context.mqtt_client = MQTTClient(context)
+
+    captured_output = io.StringIO()
+    with redirect_stdout(captured_output):
+        moisture_response(context.matching_plant, context.plant, context.mqtt_client)
+    print_output = captured_output.getvalue()
+
+    print(f"this is the printed output: {print_output}")
+    
+    if expected_action.lower() == "alert user":
+        assert print_output.lower(), f"Soil Moisture {context.plant.moisture} % is too high. Please put the plant inside or take it into the sun for a short time to dry."
+    elif expected_action.lower() == "activate pump":
+        assert print_output.lower(), f"Soil Moisture {context.plant.moisture} % is too low. Activating waterpump."
+    elif expected_action.lower() == "do nothing":
+        assert print_output.lower(), f"Soil Moisture adequate."
+
+
+\end{minted}
+\caption{Cucumber Test, Python}\label{cde:applicationService}
+\end{longlisting}
+\newpage

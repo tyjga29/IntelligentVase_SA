@@ -1,0 +1,32 @@
+\section{Fazit} \label{sec_06}
+
+\subsection{Zusammenfassung}
+In dieser Arbeit wurden verschiedene, bereits implementierte Projekte, welche einen intelligenten Ansatz zur Pflanzenpflege verfolgten gesichtet. Relevante Informationen für eine an Konsumenten gerichtete intelligente Vase konnten zusammengefasst und auf das Projekt übertragen werden.
+
+Aus verschiedenen Erfahrungsberichten konnten so die Anforderungen an das Projekt gestellt und verschiedene Use-Cases erstellt werden. Die intelligente Vase soll hiermit sowohl einen Mehrwert für "hands-off" Konsumenten herstellen, welche die Pflanzenpflege komplett dem System übergeben, als auch Enthusiasten, welche mehr Informationen und Tipps zur Pflege erhalten möchten.
+
+Die Steuerung mithilfe eines Sprachassistenten macht hierbei die Nutzung des Systems intuitiver und zugänglicher, ohne eine weitere Quelle der Ablenkung für den Nutzer darzustellen.
+
+Das Projekt konnte in großen Teilen den Anforderungen entsprechend umgesetzt werden. Die verschiedenen Technologien wurden sorgfältig ausgewählt, um den Ansprüchen gerecht zu werden und einen ersten, funktionierenden Prototypen zu erstellen. Dieser deckt bereits zwei wichtige Use-Cases ab, er sammelt über die Sensoren Informationen über die Pflanze und gießt diese bei Bedarf automatisch. Die Funktionsweise des Codes wird durch verschiedene Tests automatisch überprüft.
+
+Mithilfe einer Auswertung der Ergebnisse wurde sowohl die Auswahl der Technologien, als auch die Codequalität und die verschiedenen bereits implementierten Funktionen überprüft. So kann der Prototyp in weiteren Iterationen verbessert und ausgebaut werden.
+
+Insgesamt wurde ein fehlerfreier, konstant laufender Prototyp eines Systems geschaffen, welcher automatisch Umweltwerte einer Pflanze aufnimmt und die Daten speichert und verarbeitet, um den Nutzenden die Pflanzenpflege zu erleichtern. Dieser kommuniziert mit dem Gerät ausschließlich über einen Sprachassistenten, die Interaktion wird auf ein Minimun beschränkt. Es werden Temperatur, Sonnenlicht und Luft-/ und Bodenfeuchtigkeit gemessen, der Nutzende über für die Pflanze unggeeignete Werte hingewiese und die Pflanze automatisch gegossen. Es ist jederzeit möglich, die Werte für die optimalen Umweltbedingungen der Pflanze anzupassen, das System lässt sich so dynamisch verändern.
+
+Außerdem ist die Softwarearchitektur offen gehalten, um jederzeit weitere Sensoren, Aktuatoren oder Informationen über die Pflanze hinzuzufügen.
+
+Es wurde die nötige Vorarbeit geleistet, um in den nächsten Schritten verschiedene KI-Technologien zu integrieren. Diese sollen die Umweltbedingungen automatisch anpassen, um das Wachstum der Pflanze zu optimieren.
+
+\subsection{Ausblick}
+Während die Sensoren auch auf lange Sicht gute Ergebnisse erzielen ist der Mikrocontroller für eine spätere Revision zu teuer. Hier sind einfache Mikrocontroller mit weniger Rechenleistung, Anschlüssen und Speicherplatzverbrauch durch die Arduino Infrastruktur sinnvoller. Weitere Aktuatoren wie Lampen, ein Sprüher für Wasser, oder eine schließbare Haube, um die Luftfeuchtigkeit zu regulieren, könnten sinnvolle Wege sein, das System weiter zu automatisieren und das Pflanzenwachstum noch besser zu unterstützen.
+
+MQTT und Influx erwiesen sich auch für größere Datenmengen als zuverlässig und können in der Produktionsphase weiterhin verwendet werden.
+
+Der Code sollte für spätere Iterationen weiter aufgeteilt werden und unter anderem Java benutzen, um stabiler zu laufen und vor allem Multithreading zu ermöglichen. Auch können noch weitere Funktionen eingebaut werden, um dem Nutzenden mehr Möglichkeiten zu geben mit dem System zu interagieren.
+
+Im Anschluss sollte der Anschluss einer Kamera erfolgen. Mithilfe eines Object-Detections-Algorithmus können die Bilder benutzt werden, um das Wachstum der Pflanze einzuschätzen. Auch können die Erkentnisse des Machine-Learnings Abschnittes implementiert werden, um das Wissen auszubauen, welche Umweltparameter besonders wichtig für das Pflanzenwachstum sind. Durch kleine Veränderungen dieser Werte kann so das optimale Wachstum begünstigt werden.
+
+Auf den Erfahrungen des Prototyps kann nun der Bau eines kohärenten Gerätes erfolgen, welcher die Sensoren und den Microcontroller sinnvoll in einem Bau unterbringt, in den eine Vase gestellt werden kann.
+
+
+

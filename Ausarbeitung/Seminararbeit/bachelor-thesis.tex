@@ -1,0 +1,179 @@
+%%**************************************************************
+%% Vorlage fuer Bachelorarbeiten (o.ä.) der DHBW
+%%
+%% Autor: Ozan Akcebe
+%% Datum: 05.12.2022
+%%**************************************************************
+
+%% Document spezifications
+\documentclass[
+	12pt,				% Schriftgröße
+	titlepage,			% Titelseite verfügbar
+	a4paper,			% DIN A4 Papier 
+	oneside,			% Zweiseitig	
+]{article}
+
+%%packages
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage[a4paper,margin={2.5cm}]{geometry}
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[onehalfspacing]{setspace}
+\usepackage{graphicx}
+\usepackage[nottoc]{tocbibind}
+\usepackage{pgffor}
+\usepackage{lipsum}
+\usepackage{xstring}
+\usepackage[hidelinks]{hyperref}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=ieee]{biblatex}
+\usepackage[acronyms, toc]{glossaries}
+\usepackage{float}
+\usepackage{cleveref}
+\usepackage{enumitem}
+\usepackage{minted}
+\usepackage{tabularx}
+
+\usepackage[titles]{tocloft}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+
+\addbibresource{bibliographie.bib}
+\usepackage{caption}
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
+\newcommand{\einstellung}[1]{%
+  \expandafter\newcommand\csname #1\endcsname{}
+  \expandafter\newcommand\csname setze#1\endcsname[1]{\expandafter\renewcommand\csname#1\endcsname{##1}}
+}
+
+
+\einstellung{titel}
+\einstellung {untertitel}
+\einstellung{autor}
+\einstellung{abschluss}
+\einstellung{studiengang}
+\einstellung{dhbw}
+\einstellung{datum}
+\einstellung{matnr}
+\einstellung{kurs}
+\einstellung{firma}
+\einstellung{firmenort}
+\einstellung{abgabeort}
+\einstellung{betreuer}
+\einstellung{bz}
+
+\setzetitel{Sensorbasierte Pflanzenüberwachung in Echtzeit}
+\setzeuntertitel{Eine Iot-Lösung für eine intelligente Vase mit Sprachsteuerung}
+\setzeautor{Tobias Kapp}
+\setzeabschluss{Studienarbeit}
+\setzestudiengang{Informatik}
+\setzedhbw{Dualen Hochschule Baden-Württemberg Stuttgart}
+\setzedatum{Juni 2024}
+\setzematnr{1985124}
+\setzekurs{TINF21B}
+\setzefirma{diconium digital solutions GmbH}
+\setzefirmenort{Stuttgart}
+\setzeabgabeort{Stuttgart}
+\setzebetreuer{Prof. Dr. Monika Kochanowski}
+\setzebz{2 Semester}
+\renewcommand{\listingscaption}{Quellcode}
+\renewcommand*{\listoflistingscaption}{Quellcodeverzeichnis}
+\providecommand*{\listingautorefname}{Quellcode}
+\makeglossaries
+\input{chapter/glossary}
+
+\begin{document}
+
+\begin{titlepage}
+
+\includegraphics[scale=0.15]{images/dhbw.png}\hfill
+	
+\vspace*{\fill}
+
+\begin{center}
+	\vspace*{12mm}	{\LARGE\textbf \titel }\\
+        \vspace*{3mm}  {\Large\textbf \untertitel}\\
+	\vspace*{9mm}	{\textbf \abschluss}\\
+	\vspace*{9mm}	des Studienganges \studiengang\\
+    \vspace*{3mm}	an der \dhbw\\
+	\vspace*{9mm}	von\\
+	\vspace*{3mm}	{\large\textbf \autor}\\
+	\vspace*{9mm}	\datum\\
+\end{center}
+
+\vspace*{\fill}
+
+\begin{tabbing}
+	mmmmmmmmmmmmmmmmmmmmmmmmmm				\= \kill
+	\textbf{Bearbeitungszeitraum}			\>  \bz \\
+	\textbf{Matrikelnummer, Kurs}			\>  \matnr , \kurs \\
+	\textbf{Dualer Partner}					\>  \firma \\
+	\textbf{Betreuer}	                    \>  \betreuer \\
+\end{tabbing}
+\end{titlepage}
+
+\fancyhf{} 
+
+\pagenumbering{Roman}
+
+\input{chapter/abstract}
+\newpage
+
+%Erklärung
+\input{chapter/erklaerung}
+\newpage
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{section}{Inhaltsverzeichnis}
+\tableofcontents
+\newpage
+
+\cleardoublepage
+\printglossary[type=\acronymtype, title=Abkürzungsverzeichnis, nonumberlist]
+\newpage
+
+\cleardoublepage
+\printglossary[title=Glossar,nonumberlist]
+\newpage
+
+
+\fancyhf{} 
+\fancyfoot[R]{\thepage}
+
+\pagenumbering{arabic}
+
+% Inhalt
+\foreach \ChapterNumber in {01,02,03,04,05,06,07,08,09,...,99} {%
+	\edef\FileName{chapter/c\ChapterNumber}%
+		\IfFileExists{\FileName}{%
+			\input{\FileName}
+		}
+	}
+
+\cleardoublepage
+\listoffigures
+\newpage
+
+\cleardoublepage
+\listoftables
+\newpage
+
+\cleardoublepage
+\listoflistings
+\addcontentsline{toc}{section}{\listoflistingscaption}
+\newpage
+
+%Anhang
+\cleardoublepage
+\input{chapter/anhang}
+\thispagestyle{empty} 
+\newpage
+
+\cleardoublepage
+\printbibliography
+\addcontentsline{toc}{section}{Literatur}
+\newpage
+\end{document}
